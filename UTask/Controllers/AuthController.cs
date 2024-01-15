@@ -4,6 +4,7 @@ using Microsoft.Build.Framework;
 using HWUTask.Data;
 using UTask.Data.Dtos;
 using UTask.Data.Services;
+using Microsoft.AspNetCore.Identity;
 namespace HWUTask.Controllers
 {
     [Route("api/[controller]")]
@@ -83,10 +84,34 @@ namespace HWUTask.Controllers
         }
 
 
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUser([FromHeader(Name = "Authorization")] string token)
+        {
+            var user = await _authService.GetUser(token);
+            if (user != null)
+            {
+                return Ok(user);
+            }
+            return BadRequest();
+        }
+
+        [HttpPut("updateUser")]
+        public async Task<IActionResult> UpdateUser(ProfileDto updateUserDto, [FromHeader(Name = "Authorization")] string token)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _authService.UpdateUser(updateUserDto, token);
+                if (result)
+                {
+                    return Ok();
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+        }
 
 
 
-        
 
     }
 }
