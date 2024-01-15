@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using HWUTask.Data;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using Humanizer.Localisation.TimeToClockNotation;
 
 namespace UTask.Data.Services
 {
@@ -114,13 +115,19 @@ namespace UTask.Data.Services
                         
                         var response = new
                         {
-                            token = GenerateTokenString(user.UserName, role[0], client.Id),
+                            token = GenerateTokenString(user.Id, role[0], client.Id),
                             role = role,
                             user = new
                             {
                                 firstName = client.FirstName,
                                 lastName = client.LastName,
-                                address= address
+                                address = new
+                                {
+                                    streetAddress = address.StreetAddress,
+                                    city = address.City,
+                                    postalCode = address.PostalCode,
+                                    country = address.Country
+                                }
                     }
                         };
 
@@ -138,13 +145,19 @@ namespace UTask.Data.Services
 
                         var response = new
                         {
-                            token = GenerateTokenString(user.UserName, role[0], provider.Id),
+                            token = GenerateTokenString(user.Id, role[0], provider.Id),
                             role = role,
                             user = new
                             {
                                 firstName = provider.FirstName,
                                 lastName = provider.LastName,
-                                address = address
+                                address = new
+                                {
+                                    streetAddress = address.StreetAddress,
+                                    city = address.City,
+                                    postalCode = address.PostalCode,
+                                    country = address.Country
+                                }
                             }
                         };
 
@@ -158,11 +171,11 @@ namespace UTask.Data.Services
             return null;
         }
 
-        public string GenerateTokenString(string username, string role, int Id)
+        public string GenerateTokenString(string userId, string role, int Id)
         {
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Name, userId),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(ClaimTypes.NameIdentifier, Id.ToString())
             };
@@ -220,16 +233,172 @@ namespace UTask.Data.Services
 
         public async Task<bool> Logout(string returnUrl)
         {
-            //Use the SignOutAsync method of the _signInManager field to sign out the user
+            
             await _signInManager.SignOutAsync();
             return true;
         }
 
-/*        public async Task<bool> CreateRole(string role)
+        /*public async Task<bool> CreateRole(string role)
         {
-            //create role from the role parameter using the _roleManager field
+            
             var result = await _roleManager.CreateAsync(new IdentityRole(role));
             return result.Succeeded;
         }*/
+
+        public async Task<string> GetUser(string token)
+        {
+            
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return null;
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                   return null;
+            }
+            if (role == "Client")
+            {
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == id);
+                var address = await _context.Addresses.FirstOrDefaultAsync(c => c.AddressId == client.AddressId);
+                if (client == null)
+                {
+                    return null;
+                }
+                var response = new
+                {
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    role = role,
+                    Phone = user.PhoneNumber,
+                    Email = user.Email,
+                    Address = address
+                };
+                return JsonConvert.SerializeObject(response);
+                
+            }
+            else if (role == "Provider")
+            {
+                var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == id);
+                var address = await _context.Addresses.FirstOrDefaultAsync(c => c.AddressId == provider.AddressId);
+                
+                if (provider == null)
+                {
+                    return null;
+                }
+                var response = new
+                {
+                    FirstName = provider.FirstName,
+                    LastName = provider.LastName,
+                    role = role,
+                    Phone = user.PhoneNumber,
+                    Email = user.Email,
+                    Address = address
+                    
+                    
+                };
+                return JsonConvert.SerializeObject(response);
+            }
+            else
+            {
+                throw new Exception("Invalid role");
+            }   
+        }
+
+        public Task<bool> UpdateUser(ProfileDto updateUserDto, string token)
+        {
+            
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return Task.FromResult(false);
+            }
+
+            if (role == "Client")
+            {
+                var client = _context.Clients.FirstOrDefault(c => c.Id == id);
+                var user = _userManager.FindByIdAsync(userId).Result;
+                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == client.AddressId);
+                if (client == null)
+                {
+                    return Task.FromResult(false);
+                }
+                user.Email = updateUserDto.Email;
+                user.UserName = updateUserDto.Email;
+                client.FirstName = updateUserDto.FirstName;
+                client.LastName = updateUserDto.LastName;
+                client.Phone = updateUserDto.Phone;
+                address.StreetAddress = updateUserDto.Address.StreetAddress;
+                address.City = updateUserDto.Address.City;
+                address.PostalCode = updateUserDto.Address.PostalCode;
+                address.Province = updateUserDto.Address.Province;
+                address.Country = updateUserDto.Address.Country;
+                _userManager.UpdateAsync(user);
+                _context.SaveChangesAsync();
+                return Task.FromResult(true);
+            }
+            else if (role == "Provider")
+            {
+                var provider = _context.Providers.FirstOrDefault(p => p.Id == id);
+                var user = _userManager.FindByIdAsync(userId).Result;
+                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == provider.AddressId);
+                if (provider == null)
+                {
+                    return Task.FromResult(false);
+                }
+                user.UserName = updateUserDto.Email;
+                user.Email = updateUserDto.Email;
+                provider.FirstName = updateUserDto.FirstName;
+                provider.LastName = updateUserDto.LastName;
+                provider.Phone = updateUserDto.Phone;
+                address.StreetAddress = updateUserDto.Address.StreetAddress;
+                address.City = updateUserDto.Address.City;
+                address.PostalCode = updateUserDto.Address.PostalCode;
+                address.Province = updateUserDto.Address.Province;
+                address.Country = updateUserDto.Address.Country;
+                _userManager.UpdateAsync(user);
+                _context.SaveChangesAsync();
+                return Task.FromResult(true);
+            } else
+            {
+                throw new Exception("Invalid role");
+            }
+        }
+        
+
+        private (string, int, string) DecodeToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return (null, -1,null);
+            }
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = _config.GetSection("Jwt:issuer").Value,
+                ValidAudience = _config.GetSection("Jwt:audience").Value,
+                IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config.GetSection("Jwt:key").Value))
+            };
+
+            try
+            {
+                ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(token.Replace("Bearer ", ""), tokenValidationParameters, out SecurityToken validatedToken);
+                var userId = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
+                var id = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var role = claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value;
+                return (userId, Int32.Parse(id), role);
+
+            }
+            catch (Exception e)
+            {
+                return (null, -1, null);
+            }
+        }
+
+        
     }
 }
