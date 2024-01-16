@@ -50,6 +50,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
@@ -70,10 +72,29 @@ export default {
     },
     methods: {
         submitForm() {
-            // Call your API here to submit the form data
-            // You can access the form data using the data properties defined above
+            const registrationData = {
+                firstName: this.firstName,
+                lastName: this.lastName,
+                email: this.email,
+                password: this.password,
+                type: this.type,
+                address: {
+                    streetAddress: this.address.streetAddress,
+                    city: this.address.city,
+                    postalCode: this.address.postalCode,
+                    country: this.address.country
+                }
+            };
+
+            axios.post('http://localhost:5204/api/auth/register', registrationData)
+                .then(res => {
+                    console.log(res);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
         }
     }
-};
 </script>
 

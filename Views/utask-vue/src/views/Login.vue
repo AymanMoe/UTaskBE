@@ -8,6 +8,7 @@
                         <v-form @submit="submitForm">
                             <v-text-field v-model="email" label="Email"></v-text-field>
                             <v-text-field v-model="password" label="Password" type="password"></v-text-field>
+                            <router-link :to="{ path: '/register' }"><button>Not a user? Register instead!</button></router-link>
                             <v-checkbox v-model="rememberMe" label="Remember Me"></v-checkbox>
                             <v-btn type="submit" color="primary">Submit</v-btn>
                         </v-form>
@@ -16,28 +17,35 @@
             </v-col>
         </v-row>
     </v-container>
+ 
+    <div v-if="errorMessage" class="error-message" style="color: red;">{{ errorMessage }}</div>
+
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
             email: '',
             password: '',
-            rememberMe: false
+            rememberMe: '',
+            errorMessage: ''
         }
     },
     methods: {
         submitForm() {
-            // Call your API here
-            // Example: axios.post('/api/login', { email: this.email, password: this.password, rememberMe: this.rememberMe })
-            //   .then(response => {
-            //     // Handle response
-            //   })
-            //   .catch(error => {
-            //     // Handle error
-            //   })
+            axios.post('http://localhost:5204/api/auth/login', { email: this.email, password: this.password, rememberMe: this.rememberMe })
+            .then(res => console.log(res))
+            .catch(error => {
+                    console.log("Unauthorized");              
+                    console.error(error);
+                    this.errorMessage = 'Please log in with valid credentials.';
+            });
         }
     }
 }
 </script>
+
+

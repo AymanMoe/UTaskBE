@@ -238,12 +238,12 @@ namespace UTask.Data.Services
             return true;
         }
 
-        /*public async Task<bool> CreateRole(string role)
+        public async Task<bool> CreateRole(string role)
         {
             
             var result = await _roleManager.CreateAsync(new IdentityRole(role));
             return result.Succeeded;
-        }*/
+        }
 
         public async Task<string> GetUser(string token)
         {

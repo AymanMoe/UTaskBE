@@ -12,9 +12,12 @@ namespace HWUTask.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
-        public AuthController(AuthService authService)
+		private readonly RoleManager<IdentityRole> _roleManager;
+
+		public AuthController(AuthService authService, RoleManager<IdentityRole> roleManager)
         {
             _authService = authService;
+            _roleManager = roleManager;
         }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(RegisterationDto registerDto)
@@ -110,8 +113,15 @@ namespace HWUTask.Controllers
             return BadRequest();
         }
 
+		[HttpPost("createRole")]
+
+		public async Task<bool> CreateRole(string role)
+		{
+
+			var result = await _roleManager.CreateAsync(new IdentityRole(role));
+			return result.Succeeded;
+		}
 
 
-
-    }
+	}
 }
