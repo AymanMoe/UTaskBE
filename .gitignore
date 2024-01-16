@@ -3,3 +3,5 @@ UTask/obj
 .vs
 UTask/appsettings.json
 UTask/appsettings.Development.json
+/appsettings.Development.json
+/appsettings.json
