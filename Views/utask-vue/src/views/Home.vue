@@ -4,6 +4,7 @@
             <template v-slot:append>
             <v-btn to="/register"><v-icon>mdi mdi-account-plus-outline</v-icon></v-btn>|
             <v-btn to="/login"><v-icon>mdi mdi-login</v-icon></v-btn>
+            <v-btn to="/profile"><v-icon>mdi mdi-account</v-icon></v-btn>
             </template>
         </v-app-bar>
 
