@@ -203,24 +203,6 @@ export default {
     methods: {
         callApi() {
             console.log('Calling API');
-            // fetch('http://localhost:5204/api/Auth/test',
-            // {
-            //     method: 'GET',
-            //     headers: {
-            //     'Content-Type': 'application/json',
-            //     'Access-Control-Allow-Origin': 'http://localhost:8080/',
-            //     },
-            // }
-            // )
-            fetch('http://localhost:5204/api/Auth/test', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': 'http://localhost:8080/',
-            },
-          }) 
-                .then(response => response.json())
-                .then(data => console.log(data));
 
         }
     }

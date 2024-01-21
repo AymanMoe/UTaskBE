@@ -238,13 +238,6 @@ namespace UTask.Data.Services
             return true;
         }
 
-        public async Task<bool> CreateRole(string role)
-        {
-            
-            var result = await _roleManager.CreateAsync(new IdentityRole(role));
-            return result.Succeeded;
-        }
-
         public async Task<string> GetUser(string token)
         {
             
@@ -271,7 +264,7 @@ namespace UTask.Data.Services
                     FirstName = client.FirstName,
                     LastName = client.LastName,
                     role = role,
-                    Phone = user.PhoneNumber,
+                    Phone = client.Phone,
                     Email = user.Email,
                     Address = address
                 };
@@ -292,7 +285,7 @@ namespace UTask.Data.Services
                     FirstName = provider.FirstName,
                     LastName = provider.LastName,
                     role = role,
-                    Phone = user.PhoneNumber,
+                    Phone = provider.Phone,
                     Email = user.Email,
                     Address = address
                     
@@ -317,38 +310,41 @@ namespace UTask.Data.Services
 
             if (role == "Client")
             {
-                var client = _context.Clients.FirstOrDefault(c => c.Id == id);
                 var user = _userManager.FindByIdAsync(userId).Result;
-                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == client.AddressId);
-                if (client == null)
+
+                
+                if (user == null)
                 {
                     return Task.FromResult(false);
                 }
-                user.Email = updateUserDto.Email;
-                user.UserName = updateUserDto.Email;
+                var client = _context.Clients.FirstOrDefault(c => c.Id == id);
+
+                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == client.AddressId);
                 client.FirstName = updateUserDto.FirstName;
                 client.LastName = updateUserDto.LastName;
                 client.Phone = updateUserDto.Phone;
+                user.PhoneNumber = updateUserDto.Phone;
                 address.StreetAddress = updateUserDto.Address.StreetAddress;
                 address.City = updateUserDto.Address.City;
                 address.PostalCode = updateUserDto.Address.PostalCode;
                 address.Province = updateUserDto.Address.Province;
                 address.Country = updateUserDto.Address.Country;
+
                 _userManager.UpdateAsync(user);
                 _context.SaveChangesAsync();
                 return Task.FromResult(true);
             }
             else if (role == "Provider")
             {
-                var provider = _context.Providers.FirstOrDefault(p => p.Id == id);
                 var user = _userManager.FindByIdAsync(userId).Result;
-                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == provider.AddressId);
-                if (provider == null)
+                
+                if (user == null)
                 {
                     return Task.FromResult(false);
                 }
-                user.UserName = updateUserDto.Email;
-                user.Email = updateUserDto.Email;
+                var provider = _context.Providers.FirstOrDefault(p => p.Id == id);
+
+                var address = _context.Addresses.FirstOrDefault(c => c.AddressId == provider.AddressId);
                 provider.FirstName = updateUserDto.FirstName;
                 provider.LastName = updateUserDto.LastName;
                 provider.Phone = updateUserDto.Phone;
@@ -399,6 +395,52 @@ namespace UTask.Data.Services
             }
         }
 
-        
+        public async Task<bool> DeleteUser(DeleteUserDto deleteUserDto, string token)
+        {
+
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return false;
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            if (role == "Client")
+            {
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == id);
+                var address = await _context.Addresses.FirstOrDefaultAsync(c => c.AddressId == client.AddressId);
+                if (client == null)
+                {
+                    return false;
+                }
+                _context.Clients.Remove(client);
+                _context.Addresses.Remove(address);
+                await _context.SaveChangesAsync();
+                await _userManager.DeleteAsync(user);
+                return true;
+            }
+            else if (role == "Provider")
+            {
+                var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == id);
+                var address = await _context.Addresses.FirstOrDefaultAsync(c => c.AddressId == provider.AddressId);
+                if (provider == null)
+                {
+                    return false;
+                }
+                _context.Providers.Remove(provider);
+                _context.Addresses.Remove(address);
+                await _context.SaveChangesAsync();
+                await _userManager.DeleteAsync(user);
+                return true;
+            }
+            else
+            {
+                   throw new Exception("Invalid role");
+            }
+        }
     }
 }

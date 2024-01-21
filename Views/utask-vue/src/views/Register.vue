@@ -86,7 +86,7 @@ export default {
                 }
             };
 
-            axios.post('http://localhost:5204/api/auth/register', registrationData)
+            axios.post('https://utaskapi.azurewebsites.net/api/auth/register', registrationData)
                 .then(res => {
                     console.log(res);
                 })
