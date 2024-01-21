@@ -113,15 +113,22 @@ namespace HWUTask.Controllers
             return BadRequest();
         }
 
-		[HttpPost("createRole")]
-
-		public async Task<bool> CreateRole(string role)
-		{
-
-			var result = await _roleManager.CreateAsync(new IdentityRole(role));
-			return result.Succeeded;
-		}
 
 
+        // Generate an API endpoint to delete a user based on email and password Dto
+        [HttpDelete("deleteUser")]
+        public async Task<IActionResult> DeleteUser(DeleteUserDto deleteUserDto, [FromHeader(Name = "Authorization")] string token)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _authService.DeleteUser(deleteUserDto, token);
+                if (result)
+                {
+                    return Ok();
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+        }
 	}
 }

@@ -66,17 +66,12 @@ namespace UTask
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "UTask API", Version = "v1" });
             });
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "UTask API V1");
                     c.RoutePrefix = string.Empty; // Set the root path for Swagger UI
                 });
-            }
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
