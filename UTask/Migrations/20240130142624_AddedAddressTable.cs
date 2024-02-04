@@ -4,7 +4,7 @@
 
 namespace UTask.Migrations
 {
-    public partial class AddAddresses : Migration
+    public partial class AddedAddressTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,14 +17,6 @@ namespace UTask.Migrations
                 table: "Providers");
 
             migrationBuilder.DropColumn(
-                name: "PostalCode",
-                table: "Providers");
-
-            migrationBuilder.DropColumn(
-                name: "Province",
-                table: "Providers");
-
-            migrationBuilder.DropColumn(
                 name: "Address",
                 table: "Clients");
 
@@ -40,19 +32,15 @@ namespace UTask.Migrations
                 name: "Province",
                 table: "Clients");
 
-            migrationBuilder.AddColumn<int>(
-                name: "AddressId",
+            migrationBuilder.RenameColumn(
+                name: "Province",
                 table: "Providers",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+                newName: "Image");
 
-            migrationBuilder.AddColumn<int>(
-                name: "AddressId",
-                table: "Clients",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.RenameColumn(
+                name: "PostalCode",
+                table: "Providers",
+                newName: "Bio");
 
             migrationBuilder.CreateTable(
                 name: "Addresses",
@@ -69,12 +57,26 @@ namespace UTask.Migrations
                     Building = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Floor = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Intercom = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AppUserName = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Addresses", x => x.AddressId);
+                    table.ForeignKey(
+                        name: "FK_Addresses_AspNetUsers_AppUserName",
+                        column: x => x.AppUserName,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Addresses_AppUserName",
+                table: "Addresses",
+                column: "AppUserName",
+                unique: true,
+                filter: "[AppUserName] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -82,13 +84,15 @@ namespace UTask.Migrations
             migrationBuilder.DropTable(
                 name: "Addresses");
 
-            migrationBuilder.DropColumn(
-                name: "AddressId",
-                table: "Providers");
+            migrationBuilder.RenameColumn(
+                name: "Image",
+                table: "Providers",
+                newName: "Province");
 
-            migrationBuilder.DropColumn(
-                name: "AddressId",
-                table: "Clients");
+            migrationBuilder.RenameColumn(
+                name: "Bio",
+                table: "Providers",
+                newName: "PostalCode");
 
             migrationBuilder.AddColumn<string>(
                 name: "Address",
@@ -98,18 +102,6 @@ namespace UTask.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "City",
-                table: "Providers",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "PostalCode",
-                table: "Providers",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Province",
                 table: "Providers",
                 type: "nvarchar(max)",
                 nullable: true);

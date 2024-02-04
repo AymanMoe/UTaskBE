@@ -36,16 +36,9 @@ namespace UTask.Data.Contexts
             modelBuilder.Entity<ProviderCategory>().ToTable("Subscription");
             modelBuilder.Entity<ProviderCategory>().HasKey(pc => new { pc.ProviderId, pc.CategoryId });
 
-           
-            
-            //Add address to provider and client
-            modelBuilder.Entity<Client>().HasOne(l => l.Address)
-                .WithOne(p => p.Client)
-                .HasForeignKey<Client>(c => c.AddressId).OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<Provider>().HasOne(l => l.Address)
-                .WithOne(p => p.Provider)
-                .HasForeignKey<Provider>(c => c.AddressId).OnDelete(DeleteBehavior.NoAction);
-            
+            modelBuilder.Entity<AppUser>().HasOne(l => l.Address)
+                .WithOne(p => p.AppUser)
+                .HasForeignKey<Address>(c => c.AppUserName).OnDelete(DeleteBehavior.Cascade);
         }
     
     }

@@ -232,8 +232,13 @@ namespace UTask.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressId"), 1L, 1);
+
                     b.Property<string>("Apartment")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AppUserName")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Building")
                         .HasColumnType("nvarchar(max)");
@@ -264,7 +269,11 @@ namespace UTask.Migrations
 
                     b.HasKey("AddressId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.HasIndex("AppUserName")
+                        .IsUnique()
+                        .HasFilter("[AppUserName] IS NOT NULL");
+
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("UTask.Models.Booking", b =>
@@ -305,7 +314,7 @@ namespace UTask.Migrations
 
                     b.HasIndex("ProviderId");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("UTask.Models.Category", b =>
@@ -330,7 +339,7 @@ namespace UTask.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("UTask.Models.Client", b =>
@@ -341,9 +350,6 @@ namespace UTask.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
                     b.Property<string>("AppUserName")
                         .HasColumnType("nvarchar(450)");
 
@@ -374,7 +380,7 @@ namespace UTask.Migrations
                         .IsUnique()
                         .HasFilter("[AppUserName] IS NOT NULL");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("UTask.Models.Provider", b =>
@@ -385,16 +391,19 @@ namespace UTask.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
                     b.Property<string>("AppUserName")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
@@ -418,7 +427,7 @@ namespace UTask.Migrations
                         .IsUnique()
                         .HasFilter("[AppUserName] IS NOT NULL");
 
-                    b.ToTable("Providers", (string)null);
+                    b.ToTable("Providers");
                 });
 
             modelBuilder.Entity("UTask.Models.ProviderCategory", b =>
@@ -505,21 +514,12 @@ namespace UTask.Migrations
 
             modelBuilder.Entity("UTask.Models.Address", b =>
                 {
-                    b.HasOne("UTask.Models.Client", "Client")
+                    b.HasOne("UTask.Models.AppUser", "AppUser")
                         .WithOne("Address")
-                        .HasForeignKey("UTask.Models.Address", "AddressId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("UTask.Models.Address", "AppUserName")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("UTask.Models.Provider", "Provider")
-                        .WithOne("Address")
-                        .HasForeignKey("UTask.Models.Address", "AddressId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Provider");
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("UTask.Models.Booking", b =>
@@ -597,15 +597,11 @@ namespace UTask.Migrations
 
             modelBuilder.Entity("UTask.Models.Client", b =>
                 {
-                    b.Navigation("Address");
-
                     b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("UTask.Models.Provider", b =>
                 {
-                    b.Navigation("Address");
-
                     b.Navigation("Bookings");
 
                     b.Navigation("Categories");
@@ -613,6 +609,8 @@ namespace UTask.Migrations
 
             modelBuilder.Entity("UTask.Models.AppUser", b =>
                 {
+                    b.Navigation("Address");
+
                     b.Navigation("ClientDetails");
 
                     b.Navigation("ProviderDetails");

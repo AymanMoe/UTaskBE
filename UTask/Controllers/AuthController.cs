@@ -5,24 +5,25 @@ using HWUTask.Data;
 using UTask.Data.Dtos;
 using UTask.Data.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 namespace HWUTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly UTaskService UTaskService;
 		private readonly RoleManager<IdentityRole> _roleManager;
 
-		public AuthController(AuthService authService, RoleManager<IdentityRole> roleManager)
+		public AuthController(UTaskService authService, RoleManager<IdentityRole> roleManager)
         {
-            _authService = authService;
+            UTaskService = authService;
             _roleManager = roleManager;
         }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(RegisterationDto registerDto)
         {
-            var result = await _authService.RegisterUserAsync(registerDto);
+            var result = await UTaskService.RegisterUserAsync(registerDto);
             if (result.Succeeded)
             {
                 return Ok();
@@ -35,7 +36,7 @@ namespace HWUTask.Controllers
         {
             if (ModelState.IsValid)
             {
-                var token = await _authService.LoginUserAsync(loginModel); 
+                var token = await UTaskService.LoginUserAsync(loginModel); 
                 if (token == null)
                 {
                     return Unauthorized();
@@ -52,7 +53,7 @@ namespace HWUTask.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _authService.ForgotPassword(forgotPasswordDto);
+                var result = await UTaskService.ForgotPassword(forgotPasswordDto);
                 if (result)
                 {
                     return Ok();
@@ -68,7 +69,7 @@ namespace HWUTask.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _authService.ResetPassword(resetPasswordDto);
+                var result = await UTaskService.ResetPassword(resetPasswordDto);
                 if (result)
                 {
                     return Ok();
@@ -82,7 +83,7 @@ namespace HWUTask.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(string URL)
         {
-            await _authService.Logout(URL);
+            await UTaskService.Logout(URL);
             return Ok();
         }
 
@@ -90,7 +91,7 @@ namespace HWUTask.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetUser([FromHeader(Name = "Authorization")] string token)
         {
-            var user = await _authService.GetUser(token);
+            var user = await UTaskService.GetUser(token);
             if (user != null)
             {
                 return Ok(user);
@@ -103,7 +104,7 @@ namespace HWUTask.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _authService.UpdateUser(updateUserDto, token);
+                var result = await UTaskService.UpdateUser(updateUserDto, token);
                 if (result)
                 {
                     return Ok();
@@ -115,18 +116,44 @@ namespace HWUTask.Controllers
 
 
 
-        // Generate an API endpoint to delete a user based on email and password Dto
-        [HttpDelete("deleteUser")]
-        public async Task<IActionResult> DeleteUser(DeleteUserDto deleteUserDto, [FromHeader(Name = "Authorization")] string token)
+        [HttpDelete("deleteAccount")]
+        public async Task<IActionResult> DeleteAccount(DeleteUserDto deleteUserDto, [FromHeader(Name = "Authorization")] string token)
         {
             if (ModelState.IsValid)
             {
-                var result = await _authService.DeleteUser(deleteUserDto, token);
+                var result = await UTaskService.DeleteAccount(deleteUserDto, token);
                 if (result)
                 {
                     return Ok();
                 }
                 return BadRequest();
+            }
+            return BadRequest();
+        }
+
+
+        //[Authorize(Roles = "Admin")]
+        [HttpDelete("deleteUser")]
+        public async Task<IActionResult> DeleteUser(AppUserDto appUserDto, [FromHeader(Name = "Authorization")] string token)
+        {
+            var result = await UTaskService.DeleteUser(appUserDto, token);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+
+
+        //[Authorize(Roles = "Admin")]
+        [HttpGet("getUsers")]
+        public async Task<IActionResult> GetUsers([FromHeader(Name = "Authorization")] string token)
+        {
+            var users = await UTaskService.GetAllUsers(token);
+            if (users != null)
+            {
+                return Ok(users);
             }
             return BadRequest();
         }
