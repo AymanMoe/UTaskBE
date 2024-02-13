@@ -24,7 +24,7 @@ namespace UTask
 
             
 
-            builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<UTaskService>();
 
             builder.Services.AddCors(options =>
             {

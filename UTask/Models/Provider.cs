@@ -11,6 +11,8 @@ namespace UTask.Models
         public int Id { get; set; } // Unique identifier for the provider
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Bio { get;  set; }
+        public string Image { get;  set; }
         public string Phone { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -18,13 +20,10 @@ namespace UTask.Models
         public double Longitude { get; set; }
 
         // Navigation properties
-        public int AddressId { get; set; }
-        [JsonIgnore]
-        public Address Address { get; set; } = null!;
         public string AppUserName { get; set; }
         public AppUser? AppUser  { get; set; }
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<ProviderCategory> Categories { get; set; }
-
+        
     }
 }

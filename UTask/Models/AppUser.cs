@@ -6,7 +6,8 @@ namespace UTask.Models
     public enum UserType
     {
         Client,
-        Provider
+        Provider,
+        Admin
     }
     public class AppUser : IdentityUser
     {
@@ -17,5 +18,6 @@ namespace UTask.Models
         // Navigation properties
         public Client ClientDetails { get; set; }
         public Provider ProviderDetails { get; set; }
+        public Address Address { get; set; }
     }
 }

@@ -20,10 +20,11 @@ namespace UTask.Models
         public string? Intercom { get; set; }
         public string? Notes { get; set; }
 
-        // Navigation properties
+        public string AppUserName { get; set; }
         [JsonIgnore]
-        public Client Client { get; set; } = null!;
-        [JsonIgnore]
-        public Provider Provider { get; set; } = null!;
+        public AppUser AppUser { get; set; } = null!;
+       
+        
+
     }
 }

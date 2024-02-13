@@ -18,9 +18,7 @@ namespace UTask.Models
         public double Longitude { get; set; }
 
         // Navigation properties
-        public int AddressId { get; set; }
-        [JsonIgnore]
-        public Address Address { get; set; } = null!;
+       
         public string AppUserName { get; set; }
         public AppUser? AppUser { get; set; }
         public IEnumerable<Booking> Bookings { get; set; }
