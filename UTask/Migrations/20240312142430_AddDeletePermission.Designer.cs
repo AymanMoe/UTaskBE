@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240312142430_AddDeletePermission")]
+    partial class AddDeletePermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -662,24 +664,22 @@ namespace UTask.Migrations
                     b.HasOne("UTask.Models.Address", "Address")
                         .WithMany("Bookings")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("UTask.Models.Category", "Category")
                         .WithMany("Bookings")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UTask.Models.Client", "Client")
                         .WithMany("Bookings")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ClientId");
 
                     b.HasOne("UTask.Models.Provider", "Provider")
                         .WithMany("Bookings")
                         .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Address");
 

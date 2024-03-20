@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240318080843_CascadeClientBookings")]
+    partial class CascadeClientBookings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -674,7 +676,7 @@ namespace UTask.Migrations
                     b.HasOne("UTask.Models.Client", "Client")
                         .WithMany("Bookings")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("UTask.Models.Provider", "Provider")
                         .WithMany("Bookings")

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240220002452_AddConnectionMappings")]
+    partial class AddConnectionMappings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -299,7 +301,7 @@ namespace UTask.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ClientId")
+                    b.Property<int>("ClientId")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
@@ -321,7 +323,8 @@ namespace UTask.Migrations
 
                     b.HasIndex("AddressId");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryId")
+                        .IsUnique();
 
                     b.HasIndex("ClientId");
 
@@ -454,50 +457,12 @@ namespace UTask.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("UTask.Models.NotifiedProvider", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("NotifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("NotifiedProviders");
                 });
 
             modelBuilder.Entity("UTask.Models.Provider", b =>
@@ -587,9 +552,6 @@ namespace UTask.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProfilePicture")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -666,15 +628,16 @@ namespace UTask.Migrations
                         .IsRequired();
 
                     b.HasOne("UTask.Models.Category", "Category")
-                        .WithMany("Bookings")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .WithOne("Booking")
+                        .HasForeignKey("UTask.Models.Booking", "CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UTask.Models.Client", "Client")
                         .WithMany("Bookings")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("UTask.Models.Provider", "Provider")
                         .WithMany("Bookings")
@@ -730,25 +693,6 @@ namespace UTask.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UTask.Models.NotifiedProvider", b =>
-                {
-                    b.HasOne("UTask.Models.Booking", "Booking")
-                        .WithMany("NotifiedProviders")
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UTask.Models.Provider", "Provider")
-                        .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Provider");
-                });
-
             modelBuilder.Entity("UTask.Models.Provider", b =>
                 {
                     b.HasOne("UTask.Models.AppUser", "AppUser")
@@ -802,14 +746,9 @@ namespace UTask.Migrations
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("UTask.Models.Booking", b =>
-                {
-                    b.Navigation("NotifiedProviders");
-                });
-
             modelBuilder.Entity("UTask.Models.Category", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("Booking");
 
                     b.Navigation("Providers");
                 });

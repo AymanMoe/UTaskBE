@@ -22,6 +22,7 @@ namespace UTask.Models
         public string AppUserName { get; set; }
         public AppUser? AppUser { get; set; }
         public IEnumerable<Booking> Bookings { get; set; }
+        public IEnumerable<ClientNotification> ClientNotifications { get; set; }
 
     }
 }

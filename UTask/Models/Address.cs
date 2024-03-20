@@ -19,10 +19,15 @@ namespace UTask.Models
         public string? Floor { get; set; }
         public string? Intercom { get; set; }
         public string? Notes { get; set; }
+        //lat and long
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
         public string AppUserName { get; set; }
         [JsonIgnore]
         public AppUser AppUser { get; set; } = null!;
+        [JsonIgnore]
+        public IEnumerable<Booking> Bookings { get; set; } = null!;
        
         
 

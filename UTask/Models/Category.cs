@@ -13,8 +13,8 @@ namespace UTask.Models
         public string ImageURL { get; set; }
         //Navigation properties
         [JsonIgnore]
-        public Booking? Booking { get; set; }
-        [JsonIgnore]
         public ICollection<ProviderCategory> Providers { get; set; }
+        [JsonIgnore]
+        public ICollection<Booking> Bookings { get; set; }
     }
 }
