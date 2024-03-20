@@ -135,7 +135,7 @@ namespace UTask.Data.Services
                     {
                         return false;
                     }
-                    get connection id from connection mapping
+                   
                     ntf.Id = notification.Id;
                     var ConnectionIds = await _context.ConnectionMappings.Where(c => c.UserId == provider.AppUserName).Select(x => x.ConnectionId).ToListAsync();
 
