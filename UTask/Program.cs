@@ -78,7 +78,7 @@ namespace UTask
                 options.AddPolicy("AllowVueApp",
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:8080").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                 });
         });
 
