@@ -21,7 +21,7 @@ namespace HWUTask.Controllers
             _roleManager = roleManager;
         }
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser(RegisterationDto registerDto)
+        public async Task<IActionResult> Register(RegisterationDto registerDto)
         {
             var result = await UTaskService.RegisterUserAsync(registerDto);
             if (result.Succeeded)
@@ -30,7 +30,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginModel)
         {
@@ -46,8 +45,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
         [HttpPost("forgotpassword")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
@@ -62,8 +59,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
         [HttpPost("resetpassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
         {
@@ -78,16 +73,12 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(string URL)
         {
             await UTaskService.Logout(URL);
             return Ok();
         }
-
-
         [HttpGet("user")]
         public async Task<IActionResult> GetUser([FromHeader(Name = "Authorization")] string token)
         {
@@ -98,7 +89,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPut("updateUser")]
         public async Task<IActionResult> UpdateUser(ProfileDto updateUserDto, [FromHeader(Name = "Authorization")] string token)
         {
@@ -113,9 +103,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
-
         [HttpDelete("deleteAccount")]
         public async Task<IActionResult> DeleteAccount(DeleteUserDto deleteUserDto, [FromHeader(Name = "Authorization")] string token)
         {
@@ -130,8 +117,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
         //[Authorize(Roles = "Admin")]
         [HttpDelete("deleteUser")]
         public async Task<IActionResult> DeleteUser(AppUserDto appUserDto, [FromHeader(Name = "Authorization")] string token)
@@ -143,9 +128,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
-
-
         //[Authorize(Roles = "Admin")]
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers([FromHeader(Name = "Authorization")] string token)
