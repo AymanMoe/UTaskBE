@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UTask.Data.Services;
 using UTask.Data.Dtos;
-using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using UTask.Models;
 using System.Security.Claims;
@@ -20,9 +19,9 @@ namespace UTask.Controllers
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UTaskService UTaskService;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub> _notificationHub;
+        private readonly IHubContext<NotificationHub> _notificationHub;
         private readonly UTaskDbContext _dbContext;
-        public NotificationsController(RoleManager<IdentityRole> roleManager, UTaskService uTaskService, Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub> hubContext, UTaskDbContext uTaskDbContext)
+        public NotificationsController(RoleManager<IdentityRole> roleManager, UTaskService uTaskService, IHubContext<NotificationHub> hubContext, UTaskDbContext uTaskDbContext)
         {
             _roleManager = roleManager;
             UTaskService = uTaskService;
@@ -47,11 +46,8 @@ namespace UTask.Controllers
                     }
                     return notifications;
                 }
-                else
-                {
-                    throw new Exception("Client notification not found");
-                }
-            }else if (role == "Provider"){
+                else { throw new Exception("Client notification not found");}
+            } else if (role == "Provider"){
                 var providerNotifications = await _dbContext.ProviderNotifications.Where(p => p.ProviderId == id).ToListAsync();
                 if (providerNotifications != null)
                 {
@@ -61,30 +57,11 @@ namespace UTask.Controllers
                         var ntf = _dbContext.Notifications.FirstOrDefault(n => n.Id == pn.NotificationId);
                         notifications.Add(ntf);
                     }
-                    //find the notifications baased on the providernotifications.notificationId
-                   // var notifications = _dbContext.Notifications.Where(n => providerNotifications.Contains(n.Id)).ToList();
                     return notifications;
                 }
-                else
-                {
-                    throw new Exception("Provider notification not found");
-                }
+                else { throw new Exception("Provider notification not found");}
 
             }
-           /* var ConnectionIds = await _dbContext.ConnectionMappings.Where(c => c.UserId == userId).Select(x => x.ConnectionId).ToListAsync();
-
-            if (ConnectionIds.Count > 0)
-            {
-                await _notificationHub.Clients.Client(ConnectionIds[0]).SendAsync("ReceiveNotifications", notification);
-                   
-            }*/
-            //await _notificationHub.Clients.User(connectionMapping.ConnectionId).SendAsync("ReceiveNotifications", notification);
-            //await _notificationHub.Clients.All.SendAsync("ReceiveNotifications", notification);
-            /*var result = await UTaskService.CreateNotification(token, notificationDto);//
-            if (result)
-            {
-                return Ok();
-            }*/
             return null;
         }
 

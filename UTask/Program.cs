@@ -78,7 +78,8 @@ namespace UTask
                 options.AddPolicy("AllowVueApp",
                 builder =>
                 {
-                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                    //builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    builder.WithOrigins("https://salmon-dune-035afdf0f.5.azurestaticapps.net/", "http://localhost:8080/").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                 });
         });
 
