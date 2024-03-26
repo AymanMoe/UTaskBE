@@ -1274,32 +1274,43 @@ namespace UTask.Data.Services
 
         }
 
-        private double distance(Address address, Address p1Address)
+        private int distance(Address address, Address p1Address)
         {
             try
             {
-                var subscriptionKey = "pUBV4lwanhEEiGQZSgR4KH_dqMv5QjunNm8A2YIwS1c";
-                string url = $"https://atlas.microsoft.com/route/directions/matrix/json?api-version=1.0&subscription-key=" + subscriptionKey;
 
-                var requestData = new
-                {
-                    origins = new[] { p1Address.StreetAddress },
-                    destinations = new[] { address.StreetAddress }
-                };
+                (double DestinationLat, double DestinationLon) = getCoords(new AddressDto { StreetAddress = address.StreetAddress, City = address.City, Country = address.Country }).Result;
+                (double originLat, double originLon) = getCoords(new AddressDto { StreetAddress = p1Address.StreetAddress, City = p1Address.City, Country = p1Address.Country }).Result;
+                dynamic requestBody = new JObject();
+                requestBody.origins = new JObject();
+                requestBody.origins.type = "MultiPoint";
+                requestBody.origins.coordinates = new JArray();
+                requestBody.origins.coordinates.Add(new JArray { originLon, originLat });
+
+                requestBody.destinations = new JObject();
+                requestBody.destinations.type = "MultiPoint";
+                requestBody.destinations.coordinates = new JArray();
+                requestBody.destinations.coordinates.Add(new JArray { DestinationLon, DestinationLat });
+
+                var apiUrl = $"https://atlas.microsoft.com/route/matrix/sync/json?api-version=1.0&subscription-key=pUBV4lwanhEEiGQZSgR4KH_dqMv5QjunNm8A2YIwS1c&routeType=shortest";
+
                 HttpClient httpClient = new HttpClient();
-                var response = httpClient.PostAsJsonAsync(url, requestData);
+                var requestBodyJson = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(requestBodyJson, System.Text.Encoding.UTF8, "application/json");
+                var response = httpClient.PostAsync(apiUrl, content); 
 
-                var responseBody = response.Result.Content.ToString();
-                var responseData = JObject.Parse(responseBody);
+                var responseBody = response.Result.Content.ReadAsStringAsync();
+
+                var responseData = JObject.Parse(responseBody.Result);
 
                 if (responseData["error"] != null)
                 {
                     Console.WriteLine("Error: " + responseData["error"]["message"]);
                     return -1;
                 }
-
-                double distance = responseData["results"][0]["results"][0]["travelDistance"].Value<double>();
-                return distance;
+                JObject responseDataJson = JObject.Parse(responseData.ToString());
+                int lengthInMeters = (int)responseDataJson["matrix"][0][0]["response"]["routeSummary"]["lengthInMeters"];
+                return lengthInMeters;
             }
             catch (Exception ex)
             {
