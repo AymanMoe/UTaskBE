@@ -78,9 +78,10 @@ namespace UTask
                 options.AddPolicy("AllowVueApp",
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:8080").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                   // builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                   builder.WithOrigins("https://salmon-dune-035afdf0f.5.azurestaticapps.net", "http://localhost:8080").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                 });
-        });
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -153,6 +154,7 @@ namespace UTask
             {
                 endpoints.MapControllers();
             });
+            app.UseHttpsRedirection();
             app.Run();
             
         }

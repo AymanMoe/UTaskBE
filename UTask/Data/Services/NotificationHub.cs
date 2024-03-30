@@ -9,7 +9,6 @@ using UTask.Models;
 
 namespace UTask.Data.Services
 {
-   // [Authorize(Roles = "Admin, Client")]
     public class NotificationHub : Hub
     {
         private readonly UTaskDbContext _dbContext;
@@ -25,9 +24,6 @@ namespace UTask.Data.Services
             Console.WriteLine("Connected", userId);
             var context = Context;
             await base.OnConnectedAsync();
-
-            
-            //_dbContext.ConnectionMappings.Add(new ConnectionMapping { UserId = userId, ConnectionId = Context.ConnectionId });
             await _dbContext.SaveChangesAsync();
             
         }
@@ -46,7 +42,6 @@ namespace UTask.Data.Services
         public async Task ReceiveNotifications(NotificationDto notification)
         {
             Console.WriteLine("Recieve message to: ", notification);
-            //var connection = await _dbContext.ConnectionMappings.FindAsync(AppUserId);
                 await Clients.All.SendAsync("ReceiveNotifications", notification);
             
         }
@@ -54,10 +49,7 @@ namespace UTask.Data.Services
         public async Task Login(string AppUserId)
         {
             Console.WriteLine("Logging in: ", AppUserId);
-
-
             var connection = await _dbContext.ConnectionMappings.FirstOrDefaultAsync(c => c.UserId == AppUserId);
-
            //Refactor, too many database queries 
             if (connection == null)
             {
@@ -68,7 +60,6 @@ namespace UTask.Data.Services
             {
                 _dbContext.ConnectionMappings.Remove(connection);
                 await _dbContext.SaveChangesAsync();
-
                 connection.UserId = AppUserId;
                 connection.ConnectionId = Context.ConnectionId;
                 _dbContext.ConnectionMappings.Add(connection);

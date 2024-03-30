@@ -102,21 +102,14 @@ namespace UTask.Data.Services
                 if (role == "Client")
                 {
                     var client = await _context.Clients.FindAsync(ntf.ClientId);
-                    if (client == null)
-                    {
-                        return false;
-                    }
+                    if (client == null){return false;}
 
                     ntf.Id = notification.Id;
                     var ConnectionIds = await _context.ConnectionMappings.Where(c => c.UserId == client.AppUserName).Select(x => x.ConnectionId).ToListAsync();
-
                     if (ConnectionIds.Count > 0) { await _notificationHub.Clients.Client(ConnectionIds[0]).SendAsync("ReceiveNotifications", ntf); }
 
                     var dbClientNotification = await _context.ClientNotifications.FirstOrDefaultAsync(cn => cn.ClientId == client.Id && cn.NotificationId == notification.Id);
-                    if (dbClientNotification != null)
-                    {
-                        return true;
-                    }
+                    if (dbClientNotification != null){ return true;}
 
                     var clientNotification = new ClientNotification
                     {
@@ -132,32 +125,21 @@ namespace UTask.Data.Services
                 {
                     var provider = await _context.Providers.FindAsync(ntf.ProviderId);
                     if (provider == null)
-                    {
-                        return false;
-                    }
+                    { return false;}
                    
                     ntf.Id = notification.Id;
                     var ConnectionIds = await _context.ConnectionMappings.Where(c => c.UserId == provider.AppUserName).Select(x => x.ConnectionId).ToListAsync();
 
-                    if (ConnectionIds.Count > 0)
-                    {
-                        await _notificationHub.Clients.Client(ConnectionIds[0]).SendAsync("ReceiveNotifications", ntf);
+                    if (ConnectionIds.Count > 0) { await _notificationHub.Clients.Client(ConnectionIds[0]).SendAsync("ReceiveNotifications", ntf);}
 
-                    }
                     var dbProviderNotification = await _context.ProviderNotifications.FirstOrDefaultAsync(pn => pn.ProviderId == provider.Id && pn.NotificationId == notification.Id);
-                    if (dbProviderNotification != null)
-                    {
-                        return true;
-                    }
+                    if (dbProviderNotification != null){ return true;}
 
                     var providerNotification = new ProviderNotification
                     {
                         ProviderId = provider.Id,
                         NotificationId = notification.Id
                     };
-
-
-
                     _context.ProviderNotifications.Add(providerNotification);
                     await _context.SaveChangesAsync();
                     return true;
@@ -1051,13 +1033,14 @@ namespace UTask.Data.Services
          * 5. CompleteBooking: This step involves, NotifyClient & completing the booking process.
          * 
          */
+
+
+
+
         public async Task<object> CreateBookingAsync(string token, BookingDto bookingDto)
         {
             (string userId, int id, string role) = DecodeToken(token);
-            if (id == -1)
-            {
-                return null;
-            }
+            if (id == -1){ return null;}
 
             if (role == "Client")
             {
@@ -1138,7 +1121,6 @@ namespace UTask.Data.Services
                 };
 
                 return BookingDetails;
-               
 
             }
             else
@@ -1292,32 +1274,43 @@ namespace UTask.Data.Services
 
         }
 
-        private double distance(Address address, Address p1Address)
+        private int distance(Address address, Address p1Address)
         {
             try
             {
-                var subscriptionKey = "pUBV4lwanhEEiGQZSgR4KH_dqMv5QjunNm8A2YIwS1c";
-                string url = $"https://atlas.microsoft.com/route/directions/matrix/json?api-version=1.0&subscription-key=" + subscriptionKey;
 
-                var requestData = new
-                {
-                    origins = new[] { p1Address.StreetAddress },
-                    destinations = new[] { address.StreetAddress }
-                };
+                (double DestinationLat, double DestinationLon) = getCoords(new AddressDto { StreetAddress = address.StreetAddress, City = address.City, Country = address.Country }).Result;
+                (double originLat, double originLon) = getCoords(new AddressDto { StreetAddress = p1Address.StreetAddress, City = p1Address.City, Country = p1Address.Country }).Result;
+                dynamic requestBody = new JObject();
+                requestBody.origins = new JObject();
+                requestBody.origins.type = "MultiPoint";
+                requestBody.origins.coordinates = new JArray();
+                requestBody.origins.coordinates.Add(new JArray { originLon, originLat });
+
+                requestBody.destinations = new JObject();
+                requestBody.destinations.type = "MultiPoint";
+                requestBody.destinations.coordinates = new JArray();
+                requestBody.destinations.coordinates.Add(new JArray { DestinationLon, DestinationLat });
+
+                var apiUrl = $"https://atlas.microsoft.com/route/matrix/sync/json?api-version=1.0&subscription-key=pUBV4lwanhEEiGQZSgR4KH_dqMv5QjunNm8A2YIwS1c&routeType=shortest";
+
                 HttpClient httpClient = new HttpClient();
-                var response = httpClient.PostAsJsonAsync(url, requestData);
+                var requestBodyJson = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(requestBodyJson, System.Text.Encoding.UTF8, "application/json");
+                var response = httpClient.PostAsync(apiUrl, content); 
 
-                var responseBody = response.Result.Content.ToString();
-                var responseData = JObject.Parse(responseBody);
+                var responseBody = response.Result.Content.ReadAsStringAsync();
+
+                var responseData = JObject.Parse(responseBody.Result);
 
                 if (responseData["error"] != null)
                 {
                     Console.WriteLine("Error: " + responseData["error"]["message"]);
                     return -1;
                 }
-
-                double distance = responseData["results"][0]["results"][0]["travelDistance"].Value<double>();
-                return distance;
+                JObject responseDataJson = JObject.Parse(responseData.ToString());
+                int lengthInMeters = (int)responseDataJson["matrix"][0][0]["response"]["routeSummary"]["lengthInMeters"];
+                return lengthInMeters;
             }
             catch (Exception ex)
             {
@@ -1329,16 +1322,10 @@ namespace UTask.Data.Services
         public async Task<object> GetBookingDetailsAsync(string token, int bookingId)
         {
             (string userId, int id, string role) = DecodeToken(token);
-            if (id == -1)
-            {
-                return null;
-            }
+            if (id == -1){return null;}
 
             var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
-            if (booking == null)
-            {
-                return null;
-            }
+            if (booking == null){ return null;}
             var address = _context.Addresses.FirstOrDefault(a => a.AddressId == booking.AddressId);
             var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
             try
@@ -1461,12 +1448,9 @@ namespace UTask.Data.Services
             }
             if (address is null) { return 400; }
 
-
             var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
 
-
-
-            if (role == "Client") //update the booking from the bookingDto
+            if (role == "Client")
             {
                 booking.UpdatedAt = DateTime.Now;
                 booking.ServiceDate = bookingDto.ServiceDate;
@@ -1489,7 +1473,6 @@ namespace UTask.Data.Services
                         CreatedAt = DateTime.Now
                     });
                 } else { 
-                //notify the providers of the booking update
                 var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
                 if (notifiedProviders.Count == 0)
                 {
@@ -1501,9 +1484,6 @@ namespace UTask.Data.Services
                     {
                         np.UpdatedAt = DateTime.Now;
                         np.Status = "Notified";
-                    }
-                    foreach (var np in notifiedProviders)
-                    {
                         var provider = _context.Providers.FirstOrDefault(p => p.Id == np.ProviderId);
                         await CreateNotification("Provider", new NotificationDto
                         {
@@ -1711,27 +1691,14 @@ namespace UTask.Data.Services
         public async Task<List<object>> GetUserBookingsAsync(string token)
         {
             (string userId, int id, string role) = DecodeToken(token);
-            if (id == -1)
-            {
-                return null;
-            }
+            if (id == -1){return null;}
 
             var bookings = new List<Booking>();
             var list = new List<object>();
-            if (role == "Client")
-            {
-                bookings = _context.Bookings.Where(b => b.ClientId == id).ToList();
-            }
-            else
-            if (role == "Provider")
-            {
-                bookings = _context.Bookings.Where(b => b.ProviderId == id).ToList();
-            }
+            if (role == "Client"){bookings = _context.Bookings.Where(b => b.ClientId == id).ToList();}
+            else if (role == "Provider"){bookings = _context.Bookings.Where(b => b.ProviderId == id).ToList();}
 
-            if (bookings.Count == 0)
-            {
-                return list;
-            }
+            if (bookings.Count == 0){return list;}
 
             
             foreach (var booking in bookings)
@@ -1783,9 +1750,6 @@ namespace UTask.Data.Services
                 else if (role == "Client")
                 {
                     var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == booking.ProviderId);
-                    //var providerAddress = _context.Addresses.FirstOrDefault(a => a.AppUserName == provider.AppUserName);
-                    if (provider is not null)
-                        Console.WriteLine(provider.FirstName);
                     var bookingDetails = new
                     {
                         id = booking.Id,
@@ -1821,7 +1785,6 @@ namespace UTask.Data.Services
                             phone = provider?.Phone
                         },
                     };
-
                     list.Add(bookingDetails);
                 }
                 
@@ -1848,10 +1811,7 @@ namespace UTask.Data.Services
 
             if (role == "Client")
             {
-                if (booking.Status == "Confirmed")
-                {
-                    return false; //Booking is already confirmed
-                }
+                if (booking.Status == "Confirmed"){ return false;}
 
                 if (booking.ProviderId != null)
                 {
@@ -1867,7 +1827,7 @@ namespace UTask.Data.Services
                         CreatedAt = DateTime.Now
                     });;
                 }
-                //notify the client
+
                 await CreateNotification("Client", new NotificationDto
                 {
                     Title = "Booking Cancelled",
@@ -1878,20 +1838,17 @@ namespace UTask.Data.Services
                     Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
                     CreatedAt = DateTime.Now
                 });
-                //delete the booking
+
                 _context.Bookings.Remove(booking);
                 _context.SaveChanges();
                 return true;
             }
             else if (role == "Provider")
             {
-                
                 booking.Status = "Pending";
                 booking.UpdatedAt = DateTime.Now;
                 booking.ProviderId = null;
-                
                 var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
-
                 if (notifiedProviders.Count == 0)
                 {
                     await notifyLocalProviders((int)booking.ClientId, address, category, booking.Id);
@@ -1931,8 +1888,6 @@ namespace UTask.Data.Services
                         Data = new { BookingId = booking.Id, ClientId = booking.ClientId, Type = NotificationType.Alert, Action = "Cancelled" },
                         CreatedAt = DateTime.Now
                     });
-
-                    //send a notification to the client
                     await CreateNotification("Client", new NotificationDto
                     {
                         Title = $"{booking.Category.ServiceName} Booking Cancelled by the provider",
@@ -1943,8 +1898,6 @@ namespace UTask.Data.Services
                         Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
                         CreatedAt = DateTime.Now
                     });
-                   
-                    
                 }
                 _context.Update(booking);
                 _context.SaveChanges();
@@ -1954,5 +1907,51 @@ namespace UTask.Data.Services
             return false;
         }
 
+        public async Task<bool> CompleteBookingAsync(string token, int bookingId)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return false;
+            }
+
+            var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+            if (booking == null)
+            {
+                return false;
+            }
+
+            if (role == "Provider") { 
+                booking.Status = "Completed";
+                booking.UpdatedAt = DateTime.Now;
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == booking.ClientId);
+                var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == id);
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == booking.CategoryId);
+                var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
+
+                var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
+                foreach (var np in notifiedProviders)
+                {
+                    _context.NotifiedProviders.Remove(np);
+                }
+                _context.Update(booking);
+                await _context.SaveChangesAsync();
+
+                
+                await CreateNotification("Client", new NotificationDto
+                {
+                    Title = $"{category.ServiceName} service has been completed",
+                    Body = "The booking has been completed",
+                    Action = "Completed",
+                    Type = NotificationType.Alert,
+                    ClientId = booking.ClientId,
+                    Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
+                    CreatedAt = DateTime.Now
+                });
+                return true;
+            }
+
+            return false;
         }
+    }
     }
