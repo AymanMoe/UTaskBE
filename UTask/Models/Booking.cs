@@ -29,6 +29,8 @@ namespace UTask.Models
         public Category Category { get; set; }
         [JsonIgnore]
         public Address Address { get; set; }
+        [JsonIgnore]
+        public Review Review { get; set; }
 
 
     }

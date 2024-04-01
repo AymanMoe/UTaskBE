@@ -21,6 +21,7 @@ namespace UTask.Data.Contexts
         public DbSet<ProviderNotification> ProviderNotifications { get; set; }
          public DbSet<ConnectionMapping> ConnectionMappings { get; set; }
         public DbSet<NotifiedProvider> NotifiedProviders { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -87,6 +88,20 @@ namespace UTask.Data.Contexts
                 .HasOne(np => np.Booking)
                 .WithMany(b => b.NotifiedProviders)
                 .HasForeignKey(np => np.BookingId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Booking)
+                .WithOne(b => b.Review)
+                .HasForeignKey<Review>(r => r.BookingId).OnDelete(DeleteBehavior.NoAction); ;
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Client)
+                .WithMany(c => c.Reviews)
+                .HasForeignKey(r => r.ClientId).OnDelete(DeleteBehavior.Cascade); ;
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Provider)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProviderId).OnDelete(DeleteBehavior.NoAction); ;
         }
     
     }

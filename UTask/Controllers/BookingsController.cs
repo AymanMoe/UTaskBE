@@ -47,7 +47,7 @@ namespace UTask.Controllers
         public async Task<IActionResult> UpdateBooking([FromHeader(Name = "Authorization")] string token, int bookingId, bool? isConfirmed, BookingDto bookingDto)
         {
             var result = await UTaskService.UpdateBookingAsync(token, bookingId, isConfirmed, bookingDto);
-            if (result != 400)
+            if (result != null)
             {
                 return Ok(result);
             }

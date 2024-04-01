@@ -10,12 +10,13 @@ namespace UTask.Models
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        
+        // should a client have a bio?
         public string Phone { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public string Image { get; set; }
 
         // Navigation properties
        
@@ -23,6 +24,7 @@ namespace UTask.Models
         public AppUser? AppUser { get; set; }
         public IEnumerable<Booking> Bookings { get; set; }
         public IEnumerable<ClientNotification> ClientNotifications { get; set; }
+        public IEnumerable<Review> Reviews { get; set; }
 
     }
 }

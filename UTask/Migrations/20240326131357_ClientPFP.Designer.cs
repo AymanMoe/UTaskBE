@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240326131357_ClientPFP")]
+    partial class ClientPFP
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -580,44 +582,6 @@ namespace UTask.Migrations
                     b.ToTable("ProviderNotifications");
                 });
 
-            modelBuilder.Entity("UTask.Models.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Rating")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReviewText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId")
-                        .IsUnique();
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("UTask.Models.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -838,33 +802,6 @@ namespace UTask.Migrations
                     b.Navigation("Provider");
                 });
 
-            modelBuilder.Entity("UTask.Models.Review", b =>
-                {
-                    b.HasOne("UTask.Models.Booking", "Booking")
-                        .WithOne("Review")
-                        .HasForeignKey("UTask.Models.Review", "BookingId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("UTask.Models.Client", "Client")
-                        .WithMany("Reviews")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UTask.Models.Provider", "Provider")
-                        .WithMany("Reviews")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Provider");
-                });
-
             modelBuilder.Entity("UTask.Models.Address", b =>
                 {
                     b.Navigation("Bookings");
@@ -873,8 +810,6 @@ namespace UTask.Migrations
             modelBuilder.Entity("UTask.Models.Booking", b =>
                 {
                     b.Navigation("NotifiedProviders");
-
-                    b.Navigation("Review");
                 });
 
             modelBuilder.Entity("UTask.Models.Category", b =>
@@ -889,8 +824,6 @@ namespace UTask.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("ClientNotifications");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("UTask.Models.Notification", b =>
@@ -907,8 +840,6 @@ namespace UTask.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("ProviderNotifications");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("UTask.Models.AppUser", b =>

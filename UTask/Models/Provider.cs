@@ -25,6 +25,7 @@ namespace UTask.Models
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<ProviderCategory> Categories { get; set; }
         public ICollection<ProviderNotification> ProviderNotifications { get; set; }
+        public ICollection<Review> Reviews { get; set; }
 
     }
 }
