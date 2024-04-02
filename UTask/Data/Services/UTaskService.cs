@@ -856,7 +856,7 @@ namespace UTask.Data.Services
 
         }
 
-        public Task<List<AppUserDto>> GetAllUsers(string token)
+        public Task<List<object>> GetAllUsers(string token)
         {
             (string userId, int id, string role) = DecodeToken(token);
             if (id == -1)
@@ -869,14 +869,65 @@ namespace UTask.Data.Services
 
 
                 //var users = _userManager.Users.ToList();
-                List<AppUserDto> list = new List<AppUserDto>();
+                //List<AppUserDto> list = new List<AppUserDto>();
+                /**
+                 * each user must include the following:
+                 * Profile Picture
+                * User ID:
+                Name:
+                Email:
+                Type:
+                 */
+                List<object> list = new List<object>();
                 foreach (var user in users)
                 {
-                    list.Add(new AppUserDto
+                    if (user == null) { continue; }
+                    var address = _context.Addresses.FirstOrDefault(a => a.AppUserName == user.Id);
+                    if (address == null) { continue; }
+                    if (_userManager.GetRolesAsync(user).Result.Count == 0) { continue; }
+                    var userRole = _userManager.GetRolesAsync(user).Result[0];
+                    if (userRole == "Client")
                     {
-                        AppUserName = user.UserName,
-                        Type = _userManager.GetRolesAsync(user).Result[0]
-                    });
+                        var client = _context.Clients.FirstOrDefault(c => c.AppUserName == user.Id);
+                        if (client == null) { continue; }
+                        list.Add(new
+                        {
+                            userId = user.Id,
+                            Name = user.UserName,
+                            Email = user.Email,
+                            Type = userRole,
+                            Address = new
+                            {
+                                StreetAddress = address.StreetAddress,
+                                City = address.City,
+                                PostalCode = address.PostalCode,
+                                Province = address.Province,
+                                Country = address.Country
+                            },
+                            Profile = client.Image
+                        });
+                    }
+                    else if (userRole == "Provider")
+                    {
+                        var provider = _context.Providers.FirstOrDefault(p => p.AppUserName == user.Id);
+                        if (provider == null) { continue; }
+                        list.Add(new
+                        {
+                            userId = user.Id,
+                            Name = provider.FirstName + ", " + provider.LastName,
+                            Email = user.Email,
+                            Type = userRole,
+                            Address = new
+                            {
+                                StreetAddress = address.StreetAddress,
+                                City = address.City,
+                                PostalCode = address.PostalCode,
+                                Province = address.Province,
+                                Country = address.Country
+                            },
+                            Profile = provider.Image
+                        });
+                    }
                 }
                 return Task.FromResult(list);
             }
@@ -1274,11 +1325,11 @@ namespace UTask.Data.Services
                         address = dbAddress;
                     }
                 }
-
+                var serviceDate = DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.CurrentCulture);
 
                 var booking = new Booking
                 {
-                    ServiceDate = bookingDto.ServiceDate,
+                    ServiceDate = serviceDate,
                     BookingDate = bookingDto.BookingDate,
                     Status = bookingDto.Status,
                     CategoryId = bookingDto.CategoryId,
@@ -1665,7 +1716,7 @@ namespace UTask.Data.Services
             if (role == "Client")
             {
                 booking.UpdatedAt = DateTime.Now;
-                booking.ServiceDate = bookingDto.ServiceDate;
+                booking.ServiceDate = DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 booking.BookingDate = DateTime.Now;
                 booking.Notes = bookingDto.Notes;
                 booking.Address = address;
@@ -1676,7 +1727,7 @@ namespace UTask.Data.Services
                     await CreateNotification("Provider", new NotificationDto
                     {
                         Title = $"Booking Updated for {category.ServiceName}",
-                        Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {bookingDto.ServiceDate} has been updated by the client" +
+                        Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)} has been updated by the client" +
                         $" located in {address.PostalCode}, {address.City}. Kindly confirm or decline when you get a moment. Thanks!",
                         Action = "Reminder",
                         Type = NotificationType.Reminder,
@@ -1700,7 +1751,7 @@ namespace UTask.Data.Services
                         await CreateNotification("Provider", new NotificationDto
                         {
                             Title = $"Booking Updated for {category.ServiceName}",
-                            Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {bookingDto.ServiceDate} has been updated by the client" +
+                            Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)} has been updated by the client" +
                             $" located in {address.PostalCode}, {address.City}. Kindly confirm or decline when you get a moment. Thanks!",
                             Action = "Reminder",
                             Type = NotificationType.Reminder,
@@ -1752,7 +1803,7 @@ namespace UTask.Data.Services
             {
                 booking.Status = "Pending";
                 booking.UpdatedAt = DateTime.Now;
-                booking.ServiceDate = bookingDto.ServiceDate;
+                booking.ServiceDate = DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 booking.BookingDate = bookingDto.BookingDate;
                 booking.Notes = bookingDto.Notes;
                 booking.CategoryId = bookingDto.CategoryId;
@@ -1787,7 +1838,7 @@ namespace UTask.Data.Services
                         await CreateNotification("Provider", new NotificationDto
                         {
                             Title = $"Booking Updated for {category.ServiceName}",
-                            Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {bookingDto.ServiceDate} has been updated by the client" +
+                            Body = $"Hi {provider.FirstName}, the booking for {category.ServiceName} on {DateTime.ParseExact(bookingDto.ServiceDay + " " + bookingDto.ServiceTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)} has been updated by the client" +
                             $" located in {address.PostalCode}, {address.City}. Kindly confirm or decline when you get a moment. Thanks!",
                             Action = "Reminder",
                             Type = NotificationType.Alert,
