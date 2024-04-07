@@ -36,7 +36,7 @@ namespace UTask.Data.Contexts
                 .HasForeignKey(c => c.ProviderId).OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Category>().HasMany(l => l.Bookings)
                 .WithOne(p => p.Category)
-                .HasForeignKey(c => c.CategoryId).OnDelete(DeleteBehavior.ClientNoAction);
+                .HasForeignKey(c => c.CategoryId).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Booking>().HasOne(l => l.Client)
                 .WithMany(p => p.Bookings)
                 .HasForeignKey(c => c.ClientId).OnDelete(DeleteBehavior.SetNull);
