@@ -151,8 +151,10 @@ namespace UTask
             };
             app.MapHub<NotificationHub>("/NotificationHub", options => {
                 options.Transports =
-        HttpTransportType.WebSockets |
-        HttpTransportType.LongPolling;
+                HttpTransportType.LongPolling|
+                HttpTransportType.WebSockets |
+                HttpTransportType.ServerSentEvents;
+        
             });
             app.UseEndpoints(endpoints =>
             {

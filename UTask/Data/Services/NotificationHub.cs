@@ -58,7 +58,7 @@ namespace UTask.Data.Services
             }
             else
             {
-                _dbContext.ConnectionMappings.Remove(connection);
+                _dbContext.ConnectionMappings.RemoveRange(connection);
                 await _dbContext.SaveChangesAsync();
                 connection.UserId = AppUserId;
                 connection.ConnectionId = Context.ConnectionId;
@@ -73,7 +73,7 @@ namespace UTask.Data.Services
             var connection = await _dbContext.ConnectionMappings.FirstOrDefaultAsync(c => c.UserId == AppUserId);
             if (connection != null)
             {
-                _dbContext.ConnectionMappings.Remove(connection);
+                _dbContext.ConnectionMappings.RemoveRange(connection);
                 await _dbContext.SaveChangesAsync();
             }
         }

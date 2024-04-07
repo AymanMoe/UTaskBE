@@ -310,6 +310,7 @@ namespace UTask.Data.Services
                         {
                             token = GenerateTokenString(user.Id, role[0], client.Id),
                             role = role[0],
+                            AccountId = user.Id,
                             user = new
                             {
                                 id = client.Id,
@@ -337,6 +338,7 @@ namespace UTask.Data.Services
                         {
                             token = GenerateTokenString(user.Id, role[0], 0),
                             role = role,
+                            AccountId = user.Id,
                             user = new { id = user.Id, Email = user.Email }
                         };
                         //await _notificationHub.OnConnectedAsync();
@@ -350,6 +352,7 @@ namespace UTask.Data.Services
                         {
                             token = GenerateTokenString(user.Id, role[0], provider.Id),
                             role = role,
+                            AccountId = user.Id,
                             user = new
                             {
                                 id = provider.Id,
@@ -2282,7 +2285,7 @@ namespace UTask.Data.Services
                     Title = $"{category.ServiceName} service has been completed",
                     Body = "The booking has been completed",
                     Action = "Completed",
-                    Type = NotificationType.Booking,
+                    Type = NotificationType.Alert,
                     ClientId = booking.ClientId,
                     Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
                     CreatedAt = DateTime.Now
@@ -2293,7 +2296,7 @@ namespace UTask.Data.Services
                     Title = $"{category.ServiceName} service has been completed",
                     Body = "The booking has been completed",
                     Action = "Completed",
-                    Type = NotificationType.Booking,
+                    Type = NotificationType.Alert,
                     ProviderId = id,
                     Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
                     CreatedAt = DateTime.Now

@@ -79,9 +79,7 @@ namespace UTask.Data.Contexts
 
             modelBuilder.Entity<ConnectionMapping>()
             .HasOne(uc => uc.User)
-            .WithOne(c => c.ConnectionMapping)
-            .HasForeignKey<ConnectionMapping>(uc => uc.UserId)
-            .IsRequired();
+            .WithMany(c => c.ConnectionMappings);
 
 
             modelBuilder.Entity<NotifiedProvider>()
