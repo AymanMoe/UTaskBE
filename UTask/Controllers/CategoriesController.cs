@@ -122,5 +122,14 @@ namespace UTask.Controllers
             return Ok(providers);
         }
 
+        //get provider by id
+        [HttpGet]
+        [Route("GetProviderById")]
+        public async Task<IActionResult> GetProviderById([FromHeader(Name = "Authorization")] string token,int id)
+        {
+            var provider = await UTaskService.GetProviderByIdAsync(id);
+            return Ok(provider);
+        }
+
     }
 }

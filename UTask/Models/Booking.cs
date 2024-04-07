@@ -14,7 +14,7 @@ namespace UTask.Models
         public string Status { get; set; }
         public int? ProviderId { get; set; }
         public int? ClientId { get; set; }
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public string? Notes { get; set; }
         public int AddressId { get; set; }
 
@@ -29,6 +29,8 @@ namespace UTask.Models
         public Category Category { get; set; }
         [JsonIgnore]
         public Address Address { get; set; }
+        [JsonIgnore]
+        public Review Review { get; set; }
 
 
     }

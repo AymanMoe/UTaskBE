@@ -16,6 +16,7 @@ using Hangfire;
 using Hangfire.SqlServer;
 using System.Configuration;
 using System.Text.Json.Serialization;
+using Azure.Storage.Blobs;
 namespace UTask
 {
     public class Program
@@ -32,7 +33,10 @@ namespace UTask
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
            
             builder.Services.AddDbContext<UTaskDbContext>(options => options.UseSqlServer(connection));
-            
+            var blobConnection = builder.Configuration.GetConnectionString("AzureBlobStorage");
+            builder.Services.AddSingleton(new BlobServiceClient(blobConnection));
+
+
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.Configure<SenderOptionsDto>(builder.Configuration);
             
@@ -147,8 +151,10 @@ namespace UTask
             };
             app.MapHub<NotificationHub>("/NotificationHub", options => {
                 options.Transports =
-        HttpTransportType.WebSockets |
-        HttpTransportType.LongPolling;
+                HttpTransportType.LongPolling|
+                HttpTransportType.WebSockets |
+                HttpTransportType.ServerSentEvents;
+        
             });
             app.UseEndpoints(endpoints =>
             {

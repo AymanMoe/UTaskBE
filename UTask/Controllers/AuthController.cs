@@ -95,9 +95,9 @@ namespace HWUTask.Controllers
             if (ModelState.IsValid)
             {
                 var result = await UTaskService.UpdateUser(updateUserDto, token);
-                if (result)
+                if (result != null)
                 {
-                    return Ok();
+                    return Ok(result);
                 }
                 return BadRequest();
             }
@@ -139,5 +139,21 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
+
+        [HttpPut("profilePicture")]
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile file, [FromHeader(Name = "Authorization")] string token)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await UTaskService.UpdateProfilePicture(file, token);
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+        }
+
 	}
 }

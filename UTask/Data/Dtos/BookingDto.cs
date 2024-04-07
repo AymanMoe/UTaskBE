@@ -2,7 +2,8 @@
 {
     public class BookingDto
     {
-        public DateTime? ServiceDate { get; set; }
+        public string ServiceDay { get; set; }
+        public string ServiceTime { get; set; }
         public DateTime? BookingDate { get; set; }
         protected DateTime? UpdatedAt { get; set; } = DateTime.Now;
         public string Status { get; set; } = "Pending";

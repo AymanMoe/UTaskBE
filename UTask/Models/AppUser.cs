@@ -20,6 +20,6 @@ namespace UTask.Models
         public Client ClientDetails { get; set; }
         public Provider ProviderDetails { get; set; }
         public Address Address { get; set; }
-        public ConnectionMapping ConnectionMapping { get; set; }
+        public ICollection<ConnectionMapping> ConnectionMappings { get; set; }
     }
 }

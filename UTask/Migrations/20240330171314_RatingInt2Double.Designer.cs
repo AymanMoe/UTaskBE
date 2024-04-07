@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240330171314_RatingInt2Double")]
+    partial class RatingInt2Double
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,7 +298,7 @@ namespace UTask.Migrations
                     b.Property<DateTime?>("BookingDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ClientId")
@@ -416,21 +418,17 @@ namespace UTask.Migrations
 
             modelBuilder.Entity("UTask.Models.ConnectionMapping", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
                     b.Property<string>("ConnectionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("ConnectionId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("ConnectionMappings");
                 });
@@ -713,7 +711,8 @@ namespace UTask.Migrations
                     b.HasOne("UTask.Models.Category", "Category")
                         .WithMany("Bookings")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .IsRequired();
 
                     b.HasOne("UTask.Models.Client", "Client")
                         .WithMany("Bookings")
@@ -766,8 +765,10 @@ namespace UTask.Migrations
             modelBuilder.Entity("UTask.Models.ConnectionMapping", b =>
                 {
                     b.HasOne("UTask.Models.AppUser", "User")
-                        .WithMany("ConnectionMappings")
-                        .HasForeignKey("UserId");
+                        .WithOne("ConnectionMapping")
+                        .HasForeignKey("UTask.Models.ConnectionMapping", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -918,7 +919,7 @@ namespace UTask.Migrations
 
                     b.Navigation("ClientDetails");
 
-                    b.Navigation("ConnectionMappings");
+                    b.Navigation("ConnectionMapping");
 
                     b.Navigation("ProviderDetails");
                 });
