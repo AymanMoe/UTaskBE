@@ -16,7 +16,7 @@ namespace UTask.Models
         public int? ClientId { get; set; }
         public int? CategoryId { get; set; }
         public string? Notes { get; set; }
-        public int AddressId { get; set; }
+        public int? AddressId { get; set; }
 
         //Navigation properties
         [JsonIgnore]

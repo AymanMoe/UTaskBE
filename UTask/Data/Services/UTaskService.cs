@@ -1366,11 +1366,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     },
                     client = new
                     {
@@ -1615,11 +1615,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         client = new
                         {
@@ -1669,11 +1669,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         provider = new
                         {
@@ -1788,11 +1788,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     }
                 };
                 return response;
@@ -1872,8 +1872,10 @@ namespace UTask.Data.Services
         public async Task<object> ConfirmBooking(bool isConfirmed, Booking booking, int providerId)
         {
             var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
-            var serviceName = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId).ServiceName;
             var postalCode = _context.Addresses.FirstOrDefault(c => c.AddressId == booking.AddressId).PostalCode;
+            var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
+
+            var serviceName = category?.ServiceName;
             if (isConfirmed)
             {
                 //if the booking is already confirmed and the provider is not the one who will service it
@@ -1913,8 +1915,8 @@ namespace UTask.Data.Services
                     CreatedAt = DateTime.Now
                 });
                 var address = _context.Addresses.FirstOrDefault(a => a.AddressId == booking.AddressId);
-                var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
                 var provider = _context.Providers.FirstOrDefault(p => p.Id == providerId);
+                
 
                 //Notify the provider of the booking confirmation
                 await CreateNotification("Provider", new NotificationDto
@@ -1950,11 +1952,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     },
                     provider = new
                     {
@@ -2068,11 +2070,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         client = new
                         {
@@ -2110,11 +2112,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         provider = new
                         {
@@ -2146,6 +2148,8 @@ namespace UTask.Data.Services
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == booking.CategoryId);
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
             var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == booking.ClientId);
+
+            var serviceName = category?.ServiceName;
             if (booking == null)
             {
                 return false;
@@ -2160,7 +2164,7 @@ namespace UTask.Data.Services
                     var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == booking.ProviderId);
                     await CreateNotification("Provider", new NotificationDto
                     {
-                        Title = $"{category.ServiceName} Booking has been cancelled",
+                        Title = $"{serviceName} Booking has been cancelled",
                         Body = $"The booking for {category.ServiceName} on {booking.ServiceDate} has been cancelled by the client {client.FirstName}",
                         Action = "Cancelled",
                         Type = NotificationType.Alert,
@@ -2210,8 +2214,8 @@ namespace UTask.Data.Services
                         var provider = _context.Providers.FirstOrDefault(p => p.Id == np.ProviderId);
                         await CreateNotification("Provider", new NotificationDto
                         {
-                            Title = $"Booking Request for {category.ServiceName}",
-                            Body = $"Hi {provider.FirstName}, just a friendly reminder about the booking request for {category.ServiceName} on {booking.ServiceDate}. Kindly confirm or decline when you get a moment. Thanks!",
+                            Title = $"Booking Request for {serviceName}",
+                            Body = $"Hi {provider.FirstName}, just a friendly reminder about the booking request for {serviceName} on {booking.ServiceDate}. Kindly confirm or decline when you get a moment. Thanks!",
                             Action = "Reminder",
                             Type = NotificationType.Booking,
                             ProviderId = np.ProviderId,
@@ -2272,6 +2276,8 @@ namespace UTask.Data.Services
                 var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
 
                 var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
+                 
+                var serviceName = category?.ServiceName;
                 foreach (var np in notifiedProviders)
                 {
                     _context.NotifiedProviders.Remove(np);
@@ -2282,7 +2288,7 @@ namespace UTask.Data.Services
                 
                 await CreateNotification("Client", new NotificationDto
                 {
-                    Title = $"{category.ServiceName} service has been completed",
+                    Title = $"{serviceName} service has been completed",
                     Body = "The booking has been completed",
                     Action = "Completed",
                     Type = NotificationType.Alert,
@@ -2293,7 +2299,7 @@ namespace UTask.Data.Services
 
                 await CreateNotification("Provider", new NotificationDto
                 {
-                    Title = $"{category.ServiceName} service has been completed",
+                    Title = $"{serviceName} service has been completed",
                     Body = "The booking has been completed",
                     Action = "Completed",
                     Type = NotificationType.Alert,
