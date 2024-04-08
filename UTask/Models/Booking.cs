@@ -31,6 +31,8 @@ namespace UTask.Models
         public Address Address { get; set; }
         [JsonIgnore]
         public Review Review { get; set; }
+        [JsonIgnore]
+        public Invoice Invoice { get; set; }
 
 
     }

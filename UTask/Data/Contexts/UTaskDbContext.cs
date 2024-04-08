@@ -22,6 +22,7 @@ namespace UTask.Data.Contexts
          public DbSet<ConnectionMapping> ConnectionMappings { get; set; }
         public DbSet<NotifiedProvider> NotifiedProviders { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -99,7 +100,12 @@ namespace UTask.Data.Contexts
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Provider)
                 .WithMany(p => p.Reviews)
-                .HasForeignKey(r => r.ProviderId).OnDelete(DeleteBehavior.NoAction); ;
+                .HasForeignKey(r => r.ProviderId).OnDelete(DeleteBehavior.NoAction); 
+
+            modelBuilder.Entity<Invoice>()
+                .HasOne(i => i.Booking)
+                .WithOne(b => b.Invoice)
+                .HasForeignKey<Invoice>(i => i.BookingId).OnDelete(DeleteBehavior.SetNull);
         }
     
     }
