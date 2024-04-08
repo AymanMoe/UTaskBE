@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UTask.Data.Contexts;
 
@@ -11,9 +12,10 @@ using UTask.Data.Contexts;
 namespace UTask.Migrations
 {
     [DbContext(typeof(UTaskDbContext))]
-    partial class UTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240407123236_CascadeBookingOnAddressDelete")]
+    partial class CascadeBookingOnAddressDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -435,50 +437,6 @@ namespace UTask.Migrations
                     b.ToTable("ConnectionMappings");
                 });
 
-            modelBuilder.Entity("UTask.Models.Invoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<double?>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InvoiceDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId")
-                        .IsUnique()
-                        .HasFilter("[BookingId] IS NOT NULL");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("Invoices");
-                });
-
             modelBuilder.Entity("UTask.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -815,34 +773,6 @@ namespace UTask.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UTask.Models.Invoice", b =>
-                {
-                    b.HasOne("UTask.Models.Booking", "Booking")
-                        .WithOne("Invoice")
-                        .HasForeignKey("UTask.Models.Invoice", "BookingId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("UTask.Models.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
-                    b.HasOne("UTask.Models.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId");
-
-                    b.HasOne("UTask.Models.Provider", "Provider")
-                        .WithMany()
-                        .HasForeignKey("ProviderId");
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Provider");
-                });
-
             modelBuilder.Entity("UTask.Models.NotifiedProvider", b =>
                 {
                     b.HasOne("UTask.Models.Booking", "Booking")
@@ -943,8 +873,6 @@ namespace UTask.Migrations
 
             modelBuilder.Entity("UTask.Models.Booking", b =>
                 {
-                    b.Navigation("Invoice");
-
                     b.Navigation("NotifiedProviders");
 
                     b.Navigation("Review");

@@ -29,6 +29,7 @@ using Azure.Storage.Blobs;
 using Azure;
 using Microsoft.CodeAnalysis.Options;
 using System.Drawing;
+using System.Security.Policy;
 
 namespace UTask.Data.Services
 {
@@ -896,7 +897,7 @@ namespace UTask.Data.Services
                         list.Add(new
                         {
                             userId = user.Id,
-                            Name = user.UserName,
+                            Name = client.FirstName+", "+client.LastName,
                             Email = user.Email,
                             Type = userRole,
                             Address = new
@@ -1270,11 +1271,14 @@ namespace UTask.Data.Services
                     Client = new
                     {
                         id = r.ClientId,
-                        FirstName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).FirstName,
-                        LastName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).LastName,
-                        Image = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).Image
+                        FirstName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.FirstName,
+                        LastName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.LastName,
+                        Image = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.Image
                     },
-                    category = _context.Bookings.FirstOrDefault(b => b.Id == r.BookingId).Category.ServiceName
+                    Category = _context.Bookings
+                    .Where(b => b.Id == r.BookingId)
+                    .SelectMany(b => _context.Categories.Where(c => c.Id == b.CategoryId))
+                    .FirstOrDefault()?.ServiceName
                 }).ToList()
             };
             return response;
@@ -1366,11 +1370,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     },
                     client = new
                     {
@@ -1615,11 +1619,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         client = new
                         {
@@ -1669,11 +1673,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         provider = new
                         {
@@ -1788,11 +1792,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     }
                 };
                 return response;
@@ -1872,8 +1876,10 @@ namespace UTask.Data.Services
         public async Task<object> ConfirmBooking(bool isConfirmed, Booking booking, int providerId)
         {
             var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
-            var serviceName = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId).ServiceName;
             var postalCode = _context.Addresses.FirstOrDefault(c => c.AddressId == booking.AddressId).PostalCode;
+            var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
+
+            var serviceName = category?.ServiceName;
             if (isConfirmed)
             {
                 //if the booking is already confirmed and the provider is not the one who will service it
@@ -1913,8 +1919,8 @@ namespace UTask.Data.Services
                     CreatedAt = DateTime.Now
                 });
                 var address = _context.Addresses.FirstOrDefault(a => a.AddressId == booking.AddressId);
-                var category = _context.Categories.FirstOrDefault(c => c.Id == booking.CategoryId);
                 var provider = _context.Providers.FirstOrDefault(p => p.Id == providerId);
+                
 
                 //Notify the provider of the booking confirmation
                 await CreateNotification("Provider", new NotificationDto
@@ -1950,11 +1956,11 @@ namespace UTask.Data.Services
                     },
                     category = new
                     {
-                        id = category.Id,
-                        service = category.ServiceName,
-                        category = category.Division,
-                        description = category.Description,
-                        image = category.ImageURL
+                        id = category?.Id,
+                        service = category?.ServiceName,
+                        category = category?.Division,
+                        description = category?.Description,
+                        image = category?.ImageURL
                     },
                     provider = new
                     {
@@ -2068,11 +2074,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         client = new
                         {
@@ -2110,11 +2116,11 @@ namespace UTask.Data.Services
                         },
                         category = new
                         {
-                            id = category.Id,
-                            service = category.ServiceName,
-                            category = category.Division,
-                            description = category.Description,
-                            image = category.ImageURL
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
                         },
                         provider = new
                         {
@@ -2146,6 +2152,8 @@ namespace UTask.Data.Services
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == booking.CategoryId);
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
             var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == booking.ClientId);
+
+            var serviceName = category?.ServiceName;
             if (booking == null)
             {
                 return false;
@@ -2160,7 +2168,7 @@ namespace UTask.Data.Services
                     var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == booking.ProviderId);
                     await CreateNotification("Provider", new NotificationDto
                     {
-                        Title = $"{category.ServiceName} Booking has been cancelled",
+                        Title = $"{serviceName} Booking has been cancelled",
                         Body = $"The booking for {category.ServiceName} on {booking.ServiceDate} has been cancelled by the client {client.FirstName}",
                         Action = "Cancelled",
                         Type = NotificationType.Alert,
@@ -2210,8 +2218,8 @@ namespace UTask.Data.Services
                         var provider = _context.Providers.FirstOrDefault(p => p.Id == np.ProviderId);
                         await CreateNotification("Provider", new NotificationDto
                         {
-                            Title = $"Booking Request for {category.ServiceName}",
-                            Body = $"Hi {provider.FirstName}, just a friendly reminder about the booking request for {category.ServiceName} on {booking.ServiceDate}. Kindly confirm or decline when you get a moment. Thanks!",
+                            Title = $"Booking Request for {serviceName}",
+                            Body = $"Hi {provider.FirstName}, just a friendly reminder about the booking request for {serviceName} on {booking.ServiceDate}. Kindly confirm or decline when you get a moment. Thanks!",
                             Action = "Reminder",
                             Type = NotificationType.Booking,
                             ProviderId = np.ProviderId,
@@ -2272,6 +2280,8 @@ namespace UTask.Data.Services
                 var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
 
                 var notifiedProviders = _context.NotifiedProviders.Where(np => np.BookingId == booking.Id).ToList();
+                 
+                var serviceName = category?.ServiceName;
                 foreach (var np in notifiedProviders)
                 {
                     _context.NotifiedProviders.Remove(np);
@@ -2280,25 +2290,32 @@ namespace UTask.Data.Services
                 await _context.SaveChangesAsync();
 
                 
+                
+               var invoiceId = generateInvoices(booking, category, client, provider);
+                if (invoiceId == -1)
+                {
+                    return false;
+                }
+
                 await CreateNotification("Client", new NotificationDto
                 {
-                    Title = $"{category.ServiceName} service has been completed",
-                    Body = "The booking has been completed",
+                    Title = $"Service Completion and Invoice Generated for {serviceName}",
+                    Body = $"We are pleased to inform you that the {serviceName} service has been successfully completed, and the corresponding invoice has been generated",
                     Action = "Completed",
-                    Type = NotificationType.Alert,
+                    Type = NotificationType.Invoice,
                     ClientId = booking.ClientId,
-                    Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
+                    Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId, InvoiceId = invoiceId },
                     CreatedAt = DateTime.Now
                 });
 
                 await CreateNotification("Provider", new NotificationDto
                 {
-                    Title = $"{category.ServiceName} service has been completed",
+                    Title = $"Service Completion and Invoice Generated for {serviceName}",
                     Body = "The booking has been completed",
                     Action = "Completed",
-                    Type = NotificationType.Alert,
+                    Type = NotificationType.Invoice,
                     ProviderId = id,
-                    Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId },
+                    Data = new { BookingId = booking.Id, AddressId = booking.AddressId, CategoryId = booking.CategoryId, InvoiceId = invoiceId },
                     CreatedAt = DateTime.Now
                 });
                 return true;
@@ -2318,43 +2335,19 @@ namespace UTask.Data.Services
             {
                 return null;
             }
-            //Check if the user is a client as a client can only add a review
             if (role != "Client")
             {
                 return null;
             }
-            //Check if the user has already reviewed the provider
             var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ClientId == id && r.ProviderId == reviewDto.ProviderId);
             if (review != null)
             {
-                //update the review
                 review.Rating = reviewDto.Rating;
                 review.ReviewText = reviewDto.Comment;
                 review.ReviewDate = DateTime.Now;
                 _context.Reviews.Update(review);
                 await _context.SaveChangesAsync();
-                /**
-                 * map the review to a new object
-                 * {
-                    id = review.Id,
-                    Comment = review.ReviewText,
-                    Rating = review.Rating,
-                    ReviewDate = review.ReviewDate,
-                    Provider = new
-                    {
-                        Id = providerId,
-                        FirstName = provider.FirstName,
-                        LastName = provider.LastName,
-                        Phone = provider.Phone
-                    },
-                    Client = new
-                    {
-                        Id = client.Id,
-                        FirstName = client.FirstName,
-                        LastName = client.LastName,
-                        Email = _context.Users.FirstOrDefault(u => u.Id == client.AppUserName)?.Email,
-                        Phone = client.Phone
-                    }                 */
+               
                 var p = await _context.Providers.FirstOrDefaultAsync(p => p.Id == reviewDto.ProviderId);
                 var c = await _context.Clients.FirstOrDefaultAsync(c => c.Id == id);
                 var reviewObj = new
@@ -2572,5 +2565,308 @@ namespace UTask.Data.Services
             return review.Substring(0, maxLength - 3) + "...";
         }
 
+
+        //=======================================================================================================
+        //                                  Invoices
+        //=======================================================================================================
+        public async Task<List<object>> GetInvoicesAsync(string token)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {return null;}
+            List<object> invoicesList = new List<object>();
+            List<Invoice> invoices = new List<Invoice>();
+            if (role == "Client")
+            {
+               invoices = await _context.Invoices.Where(i => i.ClientId == id).ToListAsync(); 
+            } else if (role == "Provider")
+            {
+                   invoices = await _context.Invoices.Where(i => i.ProviderId == id).ToListAsync();
+            }
+            try
+            {
+
+                foreach (var invoice in invoices)
+                {
+                    var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == invoice.ProviderId);
+                    var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == invoice.ClientId);
+                    var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == invoice.BookingId);
+                    var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == booking.CategoryId);
+                    var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
+                    var invoiceObj = new
+                    {
+                        id = invoice.Id,
+                        amount = invoice.Amount,
+                        status = invoice.Status,
+                        provider = new
+                        {
+                            id = provider.Id,
+                            firstName = provider.FirstName,
+                            lastName = provider.LastName,
+                            phone = provider.Phone
+                        },
+                        client = new
+                        {
+                            id = client.Id,
+                            firstName = client.FirstName,
+                            lastName = client.LastName,
+                            email = _context.Users.FirstOrDefault(u => u.Id == client.AppUserName)?.Email,
+                            phone = client.Phone
+                        },
+                        booking = new
+                        {
+                            id = booking.Id,
+                            serviceDate = booking.ServiceDate,
+                            bookingDate = booking.BookingDate,
+                            updatedAt = booking.UpdatedAt,
+                            status = booking.Status,
+                            providerId = booking.ProviderId,
+                            clientId = booking.ClientId,
+                            categoryId = booking.CategoryId,
+                            addressId = booking.AddressId,
+                            notes = booking.Notes,
+                            address = new
+                            {
+                                streetAddress = address.StreetAddress,
+                                city = address.City,
+                                postalCode = address.PostalCode,
+                                country = address.Country
+                            },
+                            category = new
+                            {
+                                id = category?.Id,
+                                service = category?.ServiceName,
+                                category = category?.Division,
+                                description = category?.Description,
+                                image = category?.ImageURL
+                            }
+                        }
+                    };
+                    invoicesList.Add(invoiceObj);
+
+                }
+                return invoicesList;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteInvoiceAsync(string token, int invoiceId)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+
+            if (id == -1)
+            {
+                return false;
+            }
+
+            var invoice = await _context.Invoices.FirstOrDefaultAsync(i => i.Id == invoiceId);
+            if (invoice == null)
+            {
+                return false;
+            }
+            try
+            { 
+                _context.Invoices.Remove(invoice);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }   
+        }
+
+        public async Task<bool> UpdateInvoiceAsync(string token, int invoiceId, string status)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+
+            if (id == -1)
+            {
+                return false;
+            }
+
+            var invoice = await _context.Invoices.FirstOrDefaultAsync(i => i.Id == invoiceId);
+            if (invoice == null)
+            {
+                return false;
+            }
+            try
+            {
+                invoice.Status = status;
+                _context.Invoices.Update(invoice);
+                await _context.SaveChangesAsync();
+                var client = _context.Clients.FirstOrDefault(c => c.Id == invoice.ClientId);
+                var provider = _context.Providers.FirstOrDefault(c => c.Id == invoice.ProviderId);
+                await CreateNotification("Provider", new NotificationDto
+                {
+                    Title = $"Invoice Status Update",
+                    Body = $"Hi {provider.FirstName}, this is a confirmation invoice status has been updated. Kindly confirm when you get a moment. Thanks!",
+                    Action = "Invoice",
+                    Type = NotificationType.Invoice,
+                    ProviderId = invoice.ProviderId,
+                    Data = new { BookingId = invoice.BookingId, ClientId = invoice.ClientId, InvoiceId = invoice.Id, Type = NotificationType.Invoice, Action = "Invoice" },
+                    CreatedAt = DateTime.Now
+                });
+
+                await CreateNotification("Client", new NotificationDto
+                {
+                    Title = $"Invoice Status Update",
+                    Body = $"Hi {client.FirstName}, this is a confirmation invoice status has been updated. Kindly confirm when you get a moment. Thanks!",
+                    Action = "Invoice",
+                    Type = NotificationType.Invoice,
+                    ClientId = invoice.ClientId,
+                    Data = new { BookingId = invoice.BookingId, ClientId = invoice.ClientId, InvoiceId = invoice.Id, Type = NotificationType.Invoice, Action = "Invoice" },
+                    CreatedAt = DateTime.Now
+                });
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private int generateInvoices(Booking booking, Category category, Client client, Provider provider)
+        {
+            try
+            { 
+            var invoice = new Invoice
+            {
+                //TODO: Calculate the amount based on some algorithm
+                Amount = 100,
+                ClientId = booking.ClientId,
+                ProviderId = booking.ProviderId,
+                BookingId = booking.Id,
+                CategoryId = category.Id,
+                InvoiceDate = DateTime.Now,
+                Client = client,
+                Provider = provider,
+                Category = category,
+                Status = "Pending"
+            };
+            _context.Invoices.Add(invoice);
+            _context.SaveChanges();
+                return invoice.Id;
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+        }
+
+        public async Task<object> GetInvoiceByIdAsync(string token, int invoiceId)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return null;
+            }
+            var invoice = await _context.Invoices.FirstOrDefaultAsync(i => i.Id == invoiceId);
+            if (invoice == null)
+            {
+                return null;
+            }
+            try
+            {
+                var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == invoice.ProviderId);
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == invoice.ClientId);
+                var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == invoice.BookingId);
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == booking.CategoryId);
+                var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == booking.AddressId);
+                var invoiceObj = new
+                {
+                    id = invoice.Id,
+                    amount = invoice.Amount,
+                    status = invoice.Status,
+                    provider = new
+                    {
+                        id = provider.Id,
+                        firstName = provider.FirstName,
+                        lastName = provider.LastName,
+                        phone = provider.Phone
+                    },
+                    client = new
+                    {
+                        id = client.Id,
+                        firstName = client.FirstName,
+                        lastName = client.LastName,
+                        email = _context.Users.FirstOrDefault(u => u.Id == client.AppUserName)?.Email,
+                        phone = client.Phone
+                    },
+                    booking = new
+                    {
+                        id = booking.Id,
+                        serviceDate = booking.ServiceDate,
+                        bookingDate = booking.BookingDate,
+                        updatedAt = booking.UpdatedAt,
+                        status = booking.Status,
+                        providerId = booking.ProviderId,
+                        clientId = booking.ClientId,
+                        categoryId = booking.CategoryId,
+                        addressId = booking.AddressId,
+                        notes = booking.Notes,
+                        address = new
+                        {
+                            streetAddress = address.StreetAddress,
+                            city = address.City,
+                            postalCode = address.PostalCode,
+                            country = address.Country
+                        },
+                        category = new
+                        {
+                            id = category?.Id,
+                            service = category?.ServiceName,
+                            category = category?.Division,
+                            description = category?.Description,
+                            image = category?.ImageURL
+                        }
+                    }
+                };
+
+                return invoiceObj;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+            
+        }
+
+        public async Task<int> HealthCheck()
+        {
+            var result = await _context.Database.CanConnectAsync();
+            if(!result)
+            {
+                return 500;
+            }
+            return 200;
+
+        }
+
+        public async Task<bool> InviteFriend(string token, string email)
+        {
+            (string userId, int id, string role) = DecodeToken(token);
+            if (id == -1)
+            {
+                return false;
+            }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return false;
+            }
+            //write a personalized message to invite the friend to join the platform
+            var url = "https://salmon-dune-035afdf0f.5.azurestaticapps.net/";
+            var message = $"Hi, {user.UserName} would like to invite you to join our platform. We offer a wide range of services that you can choose from. " +
+                $"Please click on the link below to sign up. Thanks!<br>" +
+                $"<a href={url}>Click Here</a>";
+            await _emailSender.SendEmailAsync(email,"Join Utask: Your Ultimate Service Hub!", message);
+            return true;
+
+            //return true;
+        }
     }
 }

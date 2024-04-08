@@ -155,5 +155,32 @@ namespace HWUTask.Controllers
             return BadRequest();
         }
 
+        [HttpGet("health")]
+        public async Task<IActionResult> HealthCheck()
+        {
+            var result = await UTaskService.HealthCheck();
+            if (result == 200)
+            {
+                return Ok();
+            }
+            return BadRequest();
+            
+        }
+
+        [HttpPost("invite")]
+        public async Task<IActionResult> InviteUser([FromHeader(Name = "Authorization")] string token, string email)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await UTaskService.InviteFriend(token, email);
+                if (result)
+                {
+                    return Ok();
+                }
+                return BadRequest();
+            }
+            return BadRequest();
+        }
+
 	}
 }

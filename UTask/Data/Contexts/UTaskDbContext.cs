@@ -22,6 +22,7 @@ namespace UTask.Data.Contexts
          public DbSet<ConnectionMapping> ConnectionMappings { get; set; }
         public DbSet<NotifiedProvider> NotifiedProviders { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -42,7 +43,7 @@ namespace UTask.Data.Contexts
                 .HasForeignKey(c => c.ClientId).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Address>().HasMany(l => l.Bookings)
                 .WithOne(p => p.Address)
-                .HasForeignKey(c => c.AddressId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(c => c.AddressId).OnDelete(DeleteBehavior.ClientSetNull);
             modelBuilder.Entity<ProviderCategory>().ToTable("Subscription");
             modelBuilder.Entity<ProviderCategory>().HasKey(pc => new { pc.ProviderId, pc.CategoryId });
 
@@ -90,7 +91,7 @@ namespace UTask.Data.Contexts
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Booking)
                 .WithOne(b => b.Review)
-                .HasForeignKey<Review>(r => r.BookingId).OnDelete(DeleteBehavior.NoAction); ;
+                .HasForeignKey<Review>(r => r.BookingId).OnDelete(DeleteBehavior.SetNull); ;
 
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Client)
@@ -99,7 +100,12 @@ namespace UTask.Data.Contexts
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Provider)
                 .WithMany(p => p.Reviews)
-                .HasForeignKey(r => r.ProviderId).OnDelete(DeleteBehavior.NoAction); ;
+                .HasForeignKey(r => r.ProviderId).OnDelete(DeleteBehavior.NoAction); 
+
+            modelBuilder.Entity<Invoice>()
+                .HasOne(i => i.Booking)
+                .WithOne(b => b.Invoice)
+                .HasForeignKey<Invoice>(i => i.BookingId).OnDelete(DeleteBehavior.SetNull);
         }
     
     }
