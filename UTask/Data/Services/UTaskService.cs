@@ -897,7 +897,7 @@ namespace UTask.Data.Services
                         list.Add(new
                         {
                             userId = user.Id,
-                            Name = user.UserName,
+                            Name = client.FirstName+", "+client.LastName,
                             Email = user.Email,
                             Type = userRole,
                             Address = new
@@ -1271,11 +1271,14 @@ namespace UTask.Data.Services
                     Client = new
                     {
                         id = r.ClientId,
-                        FirstName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).FirstName,
-                        LastName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).LastName,
-                        Image = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId).Image
+                        FirstName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.FirstName,
+                        LastName = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.LastName,
+                        Image = _context.Clients.FirstOrDefault(c => c.Id == r.ClientId)?.Image
                     },
-                    category = _context.Bookings.FirstOrDefault(b => b.Id == r.BookingId).Category.ServiceName
+                    Category = _context.Bookings
+                    .Where(b => b.Id == r.BookingId)
+                    .SelectMany(b => _context.Categories.Where(c => c.Id == b.CategoryId))
+                    .FirstOrDefault()?.ServiceName
                 }).ToList()
             };
             return response;
