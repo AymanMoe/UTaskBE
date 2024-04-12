@@ -15,6 +15,7 @@ namespace UTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //The Notification Controller corresponds to the Real-time notification feature requirement. 
     public class NotificationsController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -64,7 +65,6 @@ namespace UTask.Controllers
             }
             return null;
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveNotification([FromHeader(Name = "Authorization")] string token, int id)
         {

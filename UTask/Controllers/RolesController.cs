@@ -25,7 +25,7 @@ namespace UTask.Controllers
             UTaskService = uTaskService;
             _userManager = userManager;
         }
-
+        //Uncomment to add new admins
         /*
         [HttpPost]
         public async Task<IActionResult> CreateRole(string role)

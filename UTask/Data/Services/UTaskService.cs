@@ -2858,7 +2858,6 @@ namespace UTask.Data.Services
             {
                 return false;
             }
-            //write a personalized message to invite the friend to join the platform
             var url = "https://salmon-dune-035afdf0f.5.azurestaticapps.net/";
             var message = $"Hi, {user.UserName} would like to invite you to join our platform. We offer a wide range of services that you can choose from. " +
                 $"Please click on the link below to sign up. Thanks!<br>" +
@@ -2866,7 +2865,6 @@ namespace UTask.Data.Services
             await _emailSender.SendEmailAsync(email,"Join Utask: Your Ultimate Service Hub!", message);
             return true;
 
-            //return true;
         }
     }
 }

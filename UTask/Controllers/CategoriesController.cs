@@ -11,6 +11,7 @@ namespace UTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //CategoriesController corresponds to the Service Provider Categories feature requirement.
     public class CategoriesController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -21,14 +22,12 @@ namespace UTask.Controllers
             _roleManager = roleManager;
             UTaskService = uTaskService;
         }
-
         [HttpGet]
         public async Task<IActionResult> GetCategories()
         {
             var categories = await UTaskService.GetCategoriesAsync();
             return Ok(categories);
         }
-
         [HttpPost]
         public async Task<IActionResult> AddCategory([FromHeader(Name = "Authorization")] string token, Category category)
         {
@@ -39,7 +38,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory([FromHeader(Name = "Authorization")] string token, int id, Category category)
         {
@@ -50,7 +48,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory([FromHeader(Name = "Authorization")] string token, int id)
         {
@@ -61,9 +58,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
-
-        //Route/Subscriptions
         [HttpPost]
         [Route("setSubscriptions")]
         public async Task<IActionResult> SubscribeToCategory([FromHeader(Name = "Authorization")] string token, SubscriptionDto subscriptionDto)
@@ -75,7 +69,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpGet]
         [Route("getSubscriptions")]
         public async Task<IActionResult> GetSubscriptions([FromHeader(Name = "Authorization")] string token)
@@ -87,33 +80,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
-
-/*        [HttpPost]
-        [Route("AddCategoryToProvider")]
-        public async Task<IActionResult> AddCategoryToProvider([FromHeader(Name = "Authorization")] string token, List<int> Categories)
-        {
-            var result = await UTaskService.AddCategoryToProviderAsync(token, Categories);
-            if (result)
-            {
-                return Ok();
-            }
-            return BadRequest();
-        }
-
-
-        [HttpDelete]
-        [Route("RemoveCategoryFromProvider")]
-        public async Task<IActionResult> RemoveCategoryFromProvider([FromHeader(Name = "Authorization")] string token, List<int> categories)
-        {
-            var result = await UTaskService.RemoveCategoryFromProviderAsync(token, categories);
-            if (result)
-            {
-                return Ok();
-            }
-            return BadRequest();
-        }*/
-
         [HttpGet]
         [Route("GetProvidersByCategoryId")]
         public async Task<IActionResult> GetProvidersByCategoryId(int id)
@@ -122,7 +88,6 @@ namespace UTask.Controllers
             return Ok(providers);
         }
 
-        //get provider by id
         [HttpGet]
         [Route("GetProviderById")]
         public async Task<IActionResult> GetProviderById([FromHeader(Name = "Authorization")] string token,int id)

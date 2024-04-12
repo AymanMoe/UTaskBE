@@ -10,11 +10,13 @@ namespace HWUTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //AuthController was developed to satisfy the User Registration and Profile Creation feature requirement
     public class AuthController : ControllerBase
     {
         private readonly UTaskService UTaskService;
 		private readonly RoleManager<IdentityRole> _roleManager;
 
+        //
 		public AuthController(UTaskService authService, RoleManager<IdentityRole> roleManager)
         {
             UTaskService = authService;
@@ -40,7 +42,6 @@ namespace HWUTask.Controllers
                 {
                     return Unauthorized();
                 }
-                //return token as json
                 return Ok(token);
             }
             return BadRequest();
@@ -117,7 +118,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-        //[Authorize(Roles = "Admin")]
         [HttpDelete("deleteUser")]
         public async Task<IActionResult> DeleteUser(AppUserDto appUserDto, [FromHeader(Name = "Authorization")] string token)
         {
@@ -128,7 +128,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-        //[Authorize(Roles = "Admin")]
         [HttpGet("getUsers")]
         public async Task<IActionResult> GetUsers([FromHeader(Name = "Authorization")] string token)
         {
@@ -139,7 +138,6 @@ namespace HWUTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPut("profilePicture")]
         public async Task<IActionResult> UpdateProfilePicture(IFormFile file, [FromHeader(Name = "Authorization")] string token)
         {
@@ -155,6 +153,7 @@ namespace HWUTask.Controllers
             return BadRequest();
         }
 
+        //HealthCheck Endpoint was developed to satisfy the help and support feature requirement
         [HttpGet("health")]
         public async Task<IActionResult> HealthCheck()
         {
@@ -167,6 +166,7 @@ namespace HWUTask.Controllers
             
         }
 
+        //InviteUser Endpoint was developed to satisfy the referral system feature requirement
         [HttpPost("invite")]
         public async Task<IActionResult> InviteUser([FromHeader(Name = "Authorization")] string token, string email)
         {

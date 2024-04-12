@@ -6,6 +6,7 @@ namespace UTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //The Invoice Controller corresponds to the Invoice System feature requirement.
     public class InvoicesController : ControllerBase
     {
         private readonly UTaskService UTaskService;
@@ -14,14 +15,12 @@ namespace UTask.Controllers
         {
             UTaskService = uTaskService;
         }
-
         [HttpGet]
         public async Task<IActionResult> GetInvoices([FromHeader (Name = "Authorization")] string token)
         {
             var invoices = await UTaskService.GetInvoicesAsync(token);
             return Ok(invoices);
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInvoice([FromHeader(Name = "Authorization")] string token, int id)
         {
@@ -32,7 +31,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInvoice([FromHeader(Name = "Authorization")] string token, int id, string status)
         {
@@ -43,7 +41,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetInvoiceById([FromHeader(Name = "Authorization")] string token, int invoiceId)
         {
