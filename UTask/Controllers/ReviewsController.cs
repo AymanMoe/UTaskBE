@@ -8,6 +8,7 @@ namespace UTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //The Reviews Controller corresponds to the Review System feature requirement. 
     public class ReviewsController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -18,22 +19,18 @@ namespace UTask.Controllers
             _roleManager = roleManager;
             UTaskService = uTaskService;
         }
-
-        //Get all reviews for a specific provider
         [HttpGet("{providerId}")]
         public async Task<IActionResult> GetReviews(int providerId)
         {
             var reviews = await UTaskService.GetReviews(providerId);
             return Ok(reviews);
         }
-
         [HttpPost]
         public async Task<IActionResult> AddReview([FromHeader(Name ="Authorization")] string token, ReviewDto reviewDto)
         {
             var review = await UTaskService.AddReview(token, reviewDto);
             return Ok(review);
         }
-
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> DeleteReview([FromHeader(Name = "Authorization")] string token, int reviewId)
         {
@@ -42,7 +39,6 @@ namespace UTask.Controllers
                 return Ok();
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
         [HttpPut("{reviewId}")]
         public async Task<IActionResult> UpdateReview([FromHeader(Name = "Authorization")] string token, int reviewId, ReviewDto reviewDto)
         {

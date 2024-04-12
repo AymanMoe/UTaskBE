@@ -50,8 +50,6 @@ namespace UTask.Data.Contexts
             modelBuilder.Entity<AppUser>().HasOne(l => l.Address)
                 .WithOne(p => p.AppUser)
                 .HasForeignKey<Address>(c => c.AppUserName).OnDelete(DeleteBehavior.Cascade);
-
-
             modelBuilder.Entity<ClientNotification>()
             .HasKey(cn => new { cn.ClientId, cn.NotificationId });
 

@@ -9,18 +9,16 @@ namespace UTask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //The Bookings Controller corresponds to the Booking & Scheduling feature requirement. 
     public class BookingsController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UTaskService UTaskService;
-
         public BookingsController(RoleManager<IdentityRole> roleManager, UTaskService uTaskService)
         {
             _roleManager = roleManager;
             UTaskService = uTaskService;
         }
-
-
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromHeader(Name = "Authorization")] string token, BookingDto bookingDto)
         {
@@ -31,7 +29,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpGet("{bookingId}")]
         public async Task<IActionResult> GetBookingDetail([FromHeader(Name = "Authorization")] string token, int bookingId)
         {
@@ -42,7 +39,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpPut("{bookingId}")]
         public async Task<IActionResult> UpdateBooking([FromHeader(Name = "Authorization")] string token, int bookingId, bool? isConfirmed, BookingDto bookingDto)
         {
@@ -53,7 +49,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpGet]
         public async Task<IActionResult> GetUserBookings([FromHeader(Name = "Authorization")] string token)
         {
@@ -64,7 +59,6 @@ namespace UTask.Controllers
             }
             return BadRequest();
         }
-
         [HttpDelete("{bookingId}")]
         public async Task<IActionResult> CancelBooking([FromHeader(Name = "Authorization")] string token, int bookingId)
         {
